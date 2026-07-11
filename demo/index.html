@@ -1,0 +1,601 @@
+<title>Climbing the Causal Tree</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --ground: #f2f5ef;
+    --panel: #ffffff;
+    --panel-2: #eef2ea;
+    --ink: #1b271f;
+    --ink-soft: #4a5a4f;
+    --ink-faint: #7f8d83;
+    --line: #d8e0d5;
+    --causal: #2e7d5b;   /* the eucalyptus green of true causation */
+    --causal-soft: #cfe4d8;
+    --spurious: #c2543a; /* the clay of a misleading correlation */
+    --spurious-soft: #f0d3c9;
+    --amber: #d5983f;
+    --bark: #937253;
+    --slate: #8391a0;
+    --shadow: 0 1px 2px rgba(20,40,28,.06), 0 8px 30px rgba(20,40,28,.07);
+    --maxw: 940px;
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0e1512; --panel: #151d18; --panel-2: #1b241d;
+      --ink: #e7efe8; --ink-soft: #a9b8ad; --ink-faint: #7c8a80;
+      --line: #263029; --causal: #59c191; --causal-soft: #1f3a2c;
+      --spurious: #e07d5f; --spurious-soft: #3a241d; --amber: #e0aa54;
+      --bark: #b08f6c; --slate: #93a1b0;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #f2f5ef; --panel: #ffffff; --panel-2: #eef2ea;
+    --ink: #1b271f; --ink-soft: #4a5a4f; --ink-faint: #7f8d83;
+    --line: #d8e0d5; --causal: #2e7d5b; --causal-soft: #cfe4d8;
+    --spurious: #c2543a; --spurious-soft: #f0d3c9; --amber: #d5983f;
+    --bark: #937253; --slate: #8391a0;
+    --shadow: 0 1px 2px rgba(20,40,28,.06), 0 8px 30px rgba(20,40,28,.07);
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e1512; --panel: #151d18; --panel-2: #1b241d;
+    --ink: #e7efe8; --ink-soft: #a9b8ad; --ink-faint: #7c8a80;
+    --line: #263029; --causal: #59c191; --causal-soft: #1f3a2c;
+    --spurious: #e07d5f; --spurious-soft: #3a241d; --amber: #e0aa54;
+    --bark: #b08f6c; --slate: #93a1b0;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--serif); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+
+  /* ---------- hero ---------- */
+  header.hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(1100px 460px at 82% -12%, color-mix(in srgb, var(--causal) 20%, transparent), transparent 60%),
+      radial-gradient(760px 380px at 6% 8%, color-mix(in srgb, var(--amber) 14%, transparent), transparent 55%);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-grid {
+    max-width: var(--maxw); margin: 0 auto; padding: 30px 22px 40px;
+    display: grid; grid-template-columns: 1.35fr .9fr; gap: 26px; align-items: center;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--causal); font-weight: 600;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .eyebrow::before { content:""; width: 26px; height: 1.5px; background: var(--causal); display:inline-block; }
+  h1 {
+    font-family: var(--sans); font-weight: 800; letter-spacing: -.02em;
+    font-size: clamp(34px, 6vw, 58px); line-height: 1.02; margin: 16px 0 0;
+    text-wrap: balance;
+  }
+  h1 .leaf { color: var(--causal); }
+  .lede {
+    font-size: clamp(16px, 2.1vw, 19px); color: var(--ink-soft);
+    margin: 16px 0 0; max-width: 34em;
+  }
+  .hero-canvas-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow); padding: 12px; aspect-ratio: 3/4; min-height: 240px;
+    display: flex; flex-direction: column;
+  }
+  .hero-canvas-card canvas { width: 100%; height: 100%; display: block; border-radius: 9px; }
+  .hero-cap { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); text-align:center; padding-top: 8px; letter-spacing: .03em; }
+
+  /* ---------- sections ---------- */
+  section { padding: 54px 0; border-bottom: 1px solid var(--line); }
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
+  }
+  h2 {
+    font-family: var(--sans); font-weight: 750; letter-spacing: -.015em;
+    font-size: clamp(24px, 3.6vw, 34px); margin: 8px 0 6px; text-wrap: balance;
+  }
+  .sub { color: var(--ink-soft); font-size: 17px; max-width: 40em; margin: 0 0 22px; }
+  p { max-width: 42em; }
+
+  /* ---------- matrix ---------- */
+  .matrix-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .seg {
+    display: inline-flex; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 3px; gap: 3px;
+  }
+  .seg button {
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px;
+    border: 0; background: transparent; color: var(--ink-soft);
+    padding: 8px 15px; border-radius: 7px; cursor: pointer; transition: .18s;
+  }
+  .seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+  .seg button:focus-visible { outline: 2px solid var(--causal); outline-offset: 2px; }
+
+  .matrix-layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start; }
+  .matrix-scroll { overflow-x: auto; }
+  table.mx { border-collapse: collapse; font-family: var(--mono); font-size: 12.5px; margin: 0 auto; }
+  table.mx th {
+    color: var(--ink-faint); font-weight: 600; padding: 5px 7px;
+    font-size: 11.5px; white-space: nowrap;
+  }
+  table.mx th.col { writing-mode: vertical-rl; transform: rotate(180deg); height: 74px; vertical-align: bottom; }
+  table.mx th.row { text-align: right; padding-right: 10px; }
+  table.mx td {
+    width: 40px; height: 40px; text-align: center; color: var(--ink);
+    font-variant-numeric: tabular-nums; border-radius: 6px;
+    transition: transform .12s, box-shadow .12s; cursor: default;
+    border: 1.5px solid transparent;
+  }
+  table.mx td.diag { color: var(--ink-faint); opacity: .45; }
+  table.mx td.hot { transform: scale(1.13); box-shadow: var(--shadow); z-index: 2; position: relative; border-color: var(--ink); }
+  table.mx td.flag { border-color: var(--amber); border-style: dashed; }
+  .arrowhint { font-size: 10px; color: var(--ink-faint); font-family: var(--mono); margin-top: 8px; }
+
+  .readout {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; box-shadow: var(--shadow); position: sticky; top: 14px;
+  }
+  .readout h3 { font-family: var(--sans); font-size: 15px; margin: 0 0 10px; }
+  .readout .pair { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
+  .bar { height: 9px; border-radius: 6px; background: var(--panel-2); overflow: hidden; margin: 5px 0 13px; }
+  .bar > span { display: block; height: 100%; border-radius: 6px; }
+  .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .tag { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 20px; letter-spacing: .04em; }
+  .tag.spur { background: var(--spurious-soft); color: var(--spurious); }
+  .tag.caus { background: var(--causal-soft); color: var(--causal); }
+
+  /* ---------- dag ---------- */
+  .dag-layout { display: grid; grid-template-columns: 1.15fr .85fr; gap: 26px; align-items: center; }
+  .dag-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 10px; }
+  .dag-card canvas { width: 100%; display: block; aspect-ratio: 1 / 1; }
+  .legend { display: flex; flex-direction: column; gap: 12px; }
+  .legrow { display: flex; align-items: baseline; gap: 12px; font-family: var(--mono); font-size: 13px; }
+  .legrow .edge { font-weight: 700; color: var(--causal); min-width: 132px; }
+  .legrow .w { color: var(--amber); font-variant-numeric: tabular-nums; }
+  .controls { display:flex; gap:10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn {
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px; cursor: pointer;
+    background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+    padding: 9px 15px; border-radius: 9px; transition: .16s;
+  }
+  .btn:hover { border-color: var(--causal); color: var(--causal); }
+  .btn:focus-visible { outline: 2px solid var(--causal); outline-offset: 2px; }
+  .btn[aria-pressed="true"] { background: var(--spurious); border-color: var(--spurious); color: #fff; }
+
+  /* ---------- cate ---------- */
+  .cate-layout { display: grid; grid-template-columns: 1.1fr .9fr; gap: 26px; align-items: center; }
+  .cate-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 14px; }
+  .cate-card canvas { width: 100%; display:block; aspect-ratio: 8/5; }
+  .treebox {
+    font-family: var(--mono); font-size: 12.5px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px; overflow-x: auto;
+    line-height: 1.75; box-shadow: var(--shadow); white-space: pre;
+  }
+  .treebox .kw { color: var(--causal); }
+  .treebox .leafhi { color: var(--amber); font-weight: 700; }
+  .treebox .leaflo { color: var(--slate); }
+  .stat-row { display:flex; gap: 26px; flex-wrap: wrap; margin: 4px 0 20px; }
+  .stat { }
+  .stat .n { font-family: var(--sans); font-weight: 800; font-size: 30px; letter-spacing: -.02em; }
+  .stat .n.spur { color: var(--spurious); }
+  .stat .n.caus { color: var(--causal); }
+  .stat .l { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .07em; }
+
+  /* ---------- footer ---------- */
+  footer { padding: 44px 0 60px; }
+  pre.run {
+    font-family: var(--mono); font-size: 13px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+    overflow-x: auto; box-shadow: var(--shadow); color: var(--ink-soft);
+  }
+  pre.run .p { color: var(--causal); }
+  .foot-note { color: var(--ink-faint); font-size: 13.5px; font-family: var(--mono); margin-top: 22px; }
+
+  .tip {
+    position: fixed; pointer-events: none; opacity: 0; transform: translateY(4px);
+    transition: opacity .12s; background: var(--ink); color: var(--ground);
+    font-family: var(--mono); font-size: 12px; padding: 7px 10px; border-radius: 8px;
+    z-index: 50; box-shadow: var(--shadow); max-width: 240px;
+  }
+
+  @media (max-width: 760px) {
+    .hero-grid, .matrix-layout, .dag-layout, .cate-layout { grid-template-columns: 1fr; }
+    .hero-canvas-card { aspect-ratio: 16/11; }
+    .readout { position: static; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+
+<header class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">proj&#8209;CAUala &nbsp;&#128040;&nbsp; causal inference for biology</div>
+      <h1>Climbing the <span class="leaf">Causal&nbsp;Tree</span></h1>
+      <p class="lede">Two genes rise and fall together — but does one <em>drive</em> the other,
+        or do they just share a hidden cause? This is the koala's climb: from tangled
+        correlation down at the leaves, up the branches, to the root that actually
+        <em>causes</em> the rest.</p>
+    </div>
+    <div class="hero-canvas-card">
+      <canvas id="heroCanvas" aria-label="A koala climbing a causal tree"></canvas>
+      <div class="hero-cap">the koala climbs toward the cause</div>
+    </div>
+  </div>
+</header>
+
+<section id="trap">
+  <div class="wrap">
+    <div class="kicker">The trap</div>
+    <h2>A correlation matrix tells a crowded, dishonest story</h2>
+    <p class="sub">Seven molecules in a signalling cascade, measured across 3,000 simulated cells.
+      Flip between what <strong>correlation</strong> sees and what a <strong>causality matrix</strong> — learned
+      by the PC algorithm — actually finds. Same data, two very different pictures.</p>
+
+    <div class="matrix-tools">
+      <div class="seg" role="group" aria-label="Matrix view">
+        <button id="btnCorr" aria-pressed="true">Correlation</button>
+        <button id="btnCaus" aria-pressed="false">Causality matrix</button>
+      </div>
+      <span class="arrowhint" id="viewNote"></span>
+    </div>
+
+    <div class="matrix-layout">
+      <div>
+        <div class="matrix-scroll"><table class="mx" id="mx"></table></div>
+        <div class="arrowhint">Hover any cell. In the causality view, a coloured cell means <b>row&nbsp;&rarr;&nbsp;column</b>: the row molecule directly causes the column one.</div>
+      </div>
+      <aside class="readout" id="readout">
+        <h3>GeneA &harr; GeneB</h3>
+        <div class="pair">These two never touch. They only share the transcription factor <b>TF</b> as a common cause.</div>
+        <div style="margin-top:14px">
+          <div class="pair">correlation <span class="tag spur">looks real</span></div>
+          <div class="bar"><span id="barCorr" style="background:var(--spurious)"></span></div>
+          <div class="pair">value: <span class="val" id="numCorr">+0.85</span></div>
+        </div>
+        <div style="margin-top:14px">
+          <div class="pair">causal effect <span class="tag caus">the truth</span></div>
+          <div class="bar"><span id="barCaus" style="background:var(--causal)"></span></div>
+          <div class="pair">value: <span class="val" id="numCaus">0.00</span></div>
+        </div>
+        <div class="pair" style="margin-top:16px; color:var(--ink-faint)">Correlation is fooled by the shared cause. The causal method refuses the edge — correctly.</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="tree">
+  <div class="wrap">
+    <div class="kicker">The climb</div>
+    <h2>The tree the koala actually climbs</h2>
+    <p class="sub">The recovered graph. Causal influence flows <em>down</em> from root to leaves;
+      the koala climbs <em>up</em> — from an observed gene back to the root cause that explains it.
+      Toggle the ghost edge to see the correlation that isn't there.</p>
+
+    <div class="dag-layout">
+      <div class="dag-card">
+        <canvas id="dagCanvas" aria-label="Causal graph of the signalling cascade with a climbing koala"></canvas>
+      </div>
+      <div>
+        <div class="legend" id="legend"></div>
+        <div class="controls">
+          <button class="btn" id="btnGhost" aria-pressed="false">Show the spurious GeneA&ndash;GeneB edge</button>
+          <button class="btn" id="btnClimb">Replay the climb</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="who">
+  <div class="wrap">
+    <div class="kicker">Beyond the average</div>
+    <h2>Not "does the drug work?" but "for whom?"</h2>
+    <p class="sub">A simulated randomized trial. The cohort-wide effect looks modest — but that single
+      number hides everything. An honest <strong>Causal Tree</strong> splits patients by a biomarker and
+      finds the responders it was averaging away.</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n">+1.25</div><div class="l">naive average effect</div></div>
+      <div class="stat"><div class="n caus">+3.03</div><div class="l">effect if biomarker &gt; 0.3</div></div>
+      <div class="stat"><div class="n spur">+0.19</div><div class="l">effect if biomarker low</div></div>
+    </div>
+
+    <div class="cate-layout">
+      <div class="cate-card">
+        <canvas id="cateCanvas" aria-label="Estimated treatment effect versus biomarker"></canvas>
+      </div>
+      <div class="treebox" id="treebox"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="kicker">Run it yourself</div>
+    <h2 style="font-size:clamp(20px,3vw,26px)">Every number on this page is real</h2>
+    <p class="sub">Nothing here is hand-tuned. The matrices, the graph, and the tree all come straight
+      out of the <span style="font-family:var(--mono)">causala</span> package running on simulated data.</p>
+    <pre class="run"><span class="p">$</span> pip install -e .
+<span class="p">$</span> pytest -q            <span style="color:var(--ink-faint)"># 20 passing</span>
+<span class="p">$</span> python examples/demo.py   <span style="color:var(--ink-faint)"># regenerates the figures + these stats</span></pre>
+    <div class="foot-note">proj&#8209;CAUala &#128040; &mdash; correlation is a hint; causation is the climb.</div>
+  </div>
+</footer>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const NAMES = ["Ligand","Stress","Receptor","Kinase","TF","GeneA","GeneB"];
+const CORR = [[1,-0.01,0.74,0.52,0.47,0.44,0.43],[-0.01,1,-0.01,0.44,0.4,0.36,0.36],[0.74,-0.01,1,0.72,0.65,0.61,0.6],[0.52,0.44,0.72,1,0.91,0.84,0.84],[0.47,0.4,0.65,0.91,1,0.92,0.92],[0.44,0.36,0.61,0.84,0.92,1,0.85],[0.43,0.36,0.6,0.84,0.92,0.85,1]];
+const CAUS = [[0,0,0,0,0,0,0],[0,0,0,0.82,0,0,0],[0,0,0,0.9,0,0,0],[0,0,0,0,1.18,0,0],[0,0,0,0,0,1,0.96],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+const DIRECTED = [["Stress","Kinase",0.82],["Receptor","Kinase",0.9],["Kinase","TF",1.18],["TF","GeneA",1.0],["TF","GeneB",0.96],["Ligand","Receptor",1.1]];
+const CATE_X = [-2.5,-2.3,-2.1,-1.9,-1.7,-1.5,-1.3,-1.1,-0.9,-0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.5];
+const CATE_Y = [0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.19,-0.13,-0.07,1.33,3.03,3.03,3.03,3.03,3.03,3.03,3.03,3.03,3.03,3.03,3.03];
+
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tip = document.getElementById('tip');
+function showTip(html, x, y){ tip.innerHTML = html; tip.style.left=(x+14)+'px'; tip.style.top=(y+14)+'px'; tip.style.opacity=1; }
+function hideTip(){ tip.style.opacity=0; }
+
+/* ============ MATRIX ============ */
+const GA = 5, GB = 6; // GeneA, GeneB indices
+let view = 'corr';
+function heat(v, mode){
+  // v in [-1.2,1.2] roughly. blend panel->accent by magnitude
+  const mag = Math.min(1, Math.abs(v)/(mode==='corr'?1:1.2));
+  if (Math.abs(v) < 1e-6) return cssv('--panel-2');
+  const base = mode==='corr' ? cssv('--spurious') : cssv('--causal');
+  const bg = cssv('--panel-2');
+  return `color-mix(in srgb, ${base} ${Math.round(mag*82)}%, ${bg})`;
+}
+function buildMatrix(){
+  const M = view==='corr'?CORR:CAUS;
+  const t = document.getElementById('mx');
+  let html = '<tr><th></th>';
+  for (const n of NAMES) html += `<th class="col">${n}</th>`;
+  html += '</tr>';
+  for (let i=0;i<7;i++){
+    html += `<tr><th class="row">${NAMES[i]}</th>`;
+    for (let j=0;j<7;j++){
+      const v = M[i][j];
+      const diag = i===j;
+      const flag = (i===GA&&j===GB)||(i===GB&&j===GA);
+      const label = view==='corr'
+        ? `${NAMES[i]} &amp; ${NAMES[j]}<br>corr = ${v>=0?'+':''}${v.toFixed(2)}`
+        : `${NAMES[i]} &rarr; ${NAMES[j]}<br>${Math.abs(v)<1e-6?'no causal edge':'effect = +'+v.toFixed(2)}`;
+      const txt = diag ? '&#183;' : (Math.abs(v)<1e-6 ? '' : (v>=0?'+':'')+v.toFixed(2));
+      html += `<td class="${diag?'diag':''} ${flag?'flag':''}" data-l="${label}" `+
+              `style="background:${diag?'transparent':heat(v,view)}">${txt}</td>`;
+    }
+    html += '</tr>';
+  }
+  t.innerHTML = html;
+  t.querySelectorAll('td').forEach(td=>{
+    td.addEventListener('mousemove', e=>{ td.classList.add('hot'); showTip(td.dataset.l, e.clientX, e.clientY); });
+    td.addEventListener('mouseleave', ()=>{ td.classList.remove('hot'); hideTip(); });
+  });
+  document.getElementById('viewNote').textContent = view==='corr'
+    ? 'symmetric · dense · 21 associations, most of them confounded'
+    : 'directed · sparse · 6 real edges, GeneA–GeneB correctly absent';
+}
+function setView(v){
+  view=v;
+  document.getElementById('btnCorr').setAttribute('aria-pressed', v==='corr');
+  document.getElementById('btnCaus').setAttribute('aria-pressed', v==='caus');
+  buildMatrix();
+}
+document.getElementById('btnCorr').onclick=()=>setView('corr');
+document.getElementById('btnCaus').onclick=()=>setView('caus');
+// readout bars
+document.getElementById('barCorr').style.width = (0.85*100)+'%';
+document.getElementById('barCaus').style.width = '2%';
+buildMatrix();
+
+/* ============ DAG + KOALA ============ */
+const dag = document.getElementById('dagCanvas');
+const NODES = {
+  Ligand:[0.24,0.11], Stress:[0.76,0.12], Receptor:[0.26,0.36],
+  Kinase:[0.52,0.53], TF:[0.52,0.73], GeneA:[0.32,0.93], GeneB:[0.72,0.93]
+};
+const EDGES = [["Ligand","Receptor"],["Stress","Kinase"],["Receptor","Kinase"],["Kinase","TF"],["TF","GeneA"],["TF","GeneB"]];
+const CLIMB = ["GeneA","TF","Kinase","Receptor","Ligand"]; // effect -> cause
+let showGhost=false, climbT=0, climbing=true;
+
+function fit(canvas){
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(2, window.devicePixelRatio||1);
+  canvas.width = r.width*dpr; canvas.height = r.height*dpr;
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w:r.width, h:r.height};
+}
+function px(node,w,h){ return [NODES[node][0]*w, NODES[node][1]*h]; }
+function arrow(ctx,x1,y1,x2,y2,col,dash){
+  const ang=Math.atan2(y2-y1,x2-x1), r=17;
+  const sx=x1+Math.cos(ang)*r, sy=y1+Math.sin(ang)*r;
+  const ex=x2-Math.cos(ang)*r, ey=y2-Math.sin(ang)*r;
+  ctx.save(); ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=2.4;
+  if(dash) ctx.setLineDash([5,5]);
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+  ctx.setLineDash([]);
+  const a=9; ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-Math.cos(ang-0.4)*a, ey-Math.sin(ang-0.4)*a);
+  ctx.lineTo(ex-Math.cos(ang+0.4)*a, ey-Math.sin(ang+0.4)*a);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function drawDag(){
+  const {ctx,w,h}=fit(dag);
+  ctx.clearRect(0,0,w,h);
+  // ghost spurious edge
+  if(showGhost){
+    const [ax,ay]=px('GeneA',w,h),[bx,by]=px('GeneB',w,h);
+    ctx.save(); ctx.strokeStyle=cssv('--spurious'); ctx.lineWidth=2.4; ctx.setLineDash([4,5]);
+    ctx.globalAlpha=.85; ctx.beginPath(); ctx.moveTo(ax,ay+2); ctx.bezierCurveTo(ax,ay+70,bx,by+70,bx,by+2); ctx.stroke();
+    ctx.restore();
+    ctx.save(); ctx.fillStyle=cssv('--spurious'); ctx.font='11px ui-monospace, monospace'; ctx.textAlign='center';
+    ctx.fillText('correlation ≠ causation', (ax+bx)/2, Math.max(ay,by)+58); ctx.restore();
+  }
+  // causal edges
+  for(const [a,b] of EDGES){
+    const [x1,y1]=px(a,w,h),[x2,y2]=px(b,w,h);
+    arrow(ctx,x1,y1,x2,y2, cssv('--line'), false);
+  }
+  // highlight the climb path travelled so far
+  const seg = CLIMB.length-1;
+  const prog = climbT*seg;
+  for(let s=0;s<seg;s++){
+    const [x1,y1]=px(CLIMB[s],w,h),[x2,y2]=px(CLIMB[s+1],w,h);
+    if(prog>=s){
+      const done = Math.min(1, prog-s);
+      arrow(ctx, x1,y1, x1+(x2-x1)*done, y1+(y2-y1)*done, cssv('--causal'), false);
+    }
+  }
+  // nodes
+  for(const n of NAMES){
+    const [x,y]=px(n,w,h);
+    const isGene = n.startsWith('Gene');
+    ctx.save();
+    ctx.beginPath(); ctx.arc(x,y,15,0,7);
+    ctx.fillStyle = cssv('--panel'); ctx.fill();
+    ctx.lineWidth=2.2; ctx.strokeStyle = n==='Ligand'? cssv('--amber') : (isGene? cssv('--slate') : cssv('--causal'));
+    ctx.stroke();
+    ctx.fillStyle=cssv('--ink'); ctx.font='600 11px ui-monospace, monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(n, x, y-24);
+    ctx.restore();
+  }
+  // koala
+  const [kx,ky]=climbPos(w,h);
+  ctx.save(); ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🐨', kx, ky);
+  ctx.restore();
+}
+function climbPos(w,h){
+  const seg=CLIMB.length-1, prog=Math.min(seg-1e-6, climbT*seg);
+  const s=Math.floor(prog), f=prog-s;
+  const [x1,y1]=px(CLIMB[s],w,h),[x2,y2]=px(CLIMB[s+1],w,h);
+  return [x1+(x2-x1)*f, y1+(y2-y1)*f - 2];
+}
+document.getElementById('btnGhost').onclick=function(){
+  showGhost=!showGhost; this.setAttribute('aria-pressed',showGhost);
+  this.textContent = showGhost?'Hide the spurious edge':'Show the spurious GeneA–GeneB edge';
+  if(reduced) drawDag();
+};
+document.getElementById('btnClimb').onclick=()=>{ climbT=0; climbing=true; };
+// legend
+document.getElementById('legend').innerHTML = DIRECTED
+  .sort((a,b)=>b[2]-a[2])
+  .map(([a,b,w])=>`<div class="legrow"><span class="edge">${a} &rarr; ${b}</span><span class="w">+${w.toFixed(2)}</span></div>`).join('');
+
+/* ============ CATE CHART ============ */
+const cate = document.getElementById('cateCanvas');
+function drawCate(){
+  const {ctx,w,h}=fit(cate);
+  ctx.clearRect(0,0,w,h);
+  const pad={l:44,r:16,t:18,b:34};
+  const X0=-2.5,X1=2.5,Y0=-0.6,Y1=3.6;
+  const sx=v=>pad.l+(v-X0)/(X1-X0)*(w-pad.l-pad.r);
+  const sy=v=>h-pad.b-(v-Y0)/(Y1-Y0)*(h-pad.t-pad.b);
+  // responder shading
+  ctx.fillStyle=cssv('--causal-soft'); ctx.globalAlpha=.5;
+  ctx.fillRect(sx(0.3),pad.t,sx(X1)-sx(0.3),h-pad.b-pad.t); ctx.globalAlpha=1;
+  // grid + axes
+  ctx.strokeStyle=cssv('--line'); ctx.lineWidth=1; ctx.fillStyle=cssv('--ink-faint');
+  ctx.font='10px ui-monospace, monospace';
+  for(let g=0;g<=3;g++){ const y=sy(g); ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText('+'+g, pad.l-6, y+3); }
+  ctx.textAlign='center';
+  for(const xv of [-2,-1,0,1,2]){ ctx.fillText(xv, sx(xv), h-pad.b+16); }
+  ctx.fillText('biomarker →', (pad.l+w-pad.r)/2, h-6);
+  // threshold
+  ctx.strokeStyle=cssv('--amber'); ctx.setLineDash([4,4]); ctx.beginPath();
+  ctx.moveTo(sx(0.3),pad.t); ctx.lineTo(sx(0.3),h-pad.b); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=cssv('--amber'); ctx.textAlign='left'; ctx.fillText('threshold 0.3', sx(0.3)+5, pad.t+10);
+  // step line
+  ctx.strokeStyle=cssv('--causal'); ctx.lineWidth=2.6; ctx.beginPath();
+  for(let i=0;i<CATE_X.length;i++){ const x=sx(CATE_X[i]),y=sy(CATE_Y[i]);
+    if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+  ctx.stroke();
+  // endpoints emphasis
+  ctx.fillStyle=cssv('--causal');
+  ctx.beginPath(); ctx.arc(sx(CATE_X[CATE_X.length-1]),sy(CATE_Y[CATE_Y.length-1]),4,0,7); ctx.fill();
+  ctx.fillStyle=cssv('--slate');
+  ctx.beginPath(); ctx.arc(sx(CATE_X[0]),sy(CATE_Y[0]),4,0,7); ctx.fill();
+}
+document.getElementById('treebox').innerHTML =
+`<span class="kw">if</span> biomarker &le; 0.24:
+   <span class="kw">if</span> biomarker &le; -0.21:
+      &rarr; <span class="leaflo">effect +0.19</span>  (non-responders)
+   <span class="kw">else</span>:
+      &rarr; <span class="leaflo">effect -0.10</span>  (non-responders)
+<span class="kw">else</span>:
+   <span class="kw">if</span> biomarker &le; 0.33:
+      &rarr; effect +1.33  (borderline)
+   <span class="kw">else</span>:
+      &rarr; <span class="leafhi">effect +3.03</span>  (responders!)`;
+
+/* ============ HERO ============ */
+const hero=document.getElementById('heroCanvas');
+let heroT=0;
+function drawHero(){
+  const {ctx,w,h}=fit(hero);
+  ctx.clearRect(0,0,w,h);
+  const cx=w*0.5, trunkTop=h*0.16, trunkBot=h*0.96;
+  // ground glow
+  // trunk
+  ctx.strokeStyle=cssv('--bark'); ctx.lineWidth=Math.max(10,w*0.05); ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(cx,trunkBot);
+  ctx.bezierCurveTo(cx-8,h*0.6, cx+8,h*0.4, cx,trunkTop); ctx.stroke();
+  // branches with leaves
+  const branches=[[0.34,-1,42],[0.5,1,50],[0.24,1,34]];
+  ctx.lineWidth=Math.max(5,w*0.022);
+  for(const [ty,dir,len] of branches){
+    const by=trunkTop+ (trunkBot-trunkTop)*ty;
+    ctx.strokeStyle=cssv('--bark'); ctx.beginPath(); ctx.moveTo(cx,by);
+    const ex=cx+dir*len, ey=by-len*0.55; ctx.lineTo(ex,ey); ctx.stroke();
+    for(let k=0;k<3;k++){
+      ctx.fillStyle=cssv('--causal'); ctx.globalAlpha=0.55+0.15*k;
+      ctx.beginPath();
+      ctx.ellipse(ex+dir*(k*7), ey-8-k*7, 11,7, dir*0.7, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  // canopy at top
+  ctx.fillStyle=cssv('--causal');
+  for(let k=0;k<6;k++){ ctx.globalAlpha=0.5+0.08*k;
+    ctx.beginPath(); ctx.ellipse(cx+Math.cos(k*1.05)*26, trunkTop-6+Math.sin(k*1.05)*18, 20,14,0,0,7); ctx.fill(); }
+  ctx.globalAlpha=1;
+  // koala climbing up the trunk (loops)
+  const p = heroT; // 0..1 bottom->top
+  const ky = trunkBot - (trunkBot-trunkTop*1.02)*p;
+  const sway = Math.sin(p*Math.PI*4)*w*0.02;
+  ctx.font=`${Math.max(24,w*0.14)}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🐨', cx+sway, ky);
+}
+
+/* ============ animation loop ============ */
+function frame(){
+  if(climbing){ climbT+=0.006; if(climbT>=1){ climbT=1; climbing=false; setTimeout(()=>{climbT=0;climbing=true;},1400);} }
+  heroT+=0.0032; if(heroT>1) heroT=0;
+  drawDag(); drawHero();
+  requestAnimationFrame(frame);
+}
+drawCate();
+if(reduced){ climbT=1; drawDag(); heroT=0.5; drawHero(); }
+else requestAnimationFrame(frame);
+
+// redraw static pieces on resize / theme change
+let rz; window.addEventListener('resize', ()=>{ clearTimeout(rz); rz=setTimeout(()=>{ drawCate(); if(reduced){drawDag();drawHero();} buildMatrix(); },120); });
+const mo=new MutationObserver(()=>{ buildMatrix(); drawCate(); if(reduced){drawDag();drawHero();} });
+mo.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
