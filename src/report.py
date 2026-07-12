@@ -16,6 +16,12 @@ import json
 import math
 from typing import Optional
 
+from src.provenance import (
+    cite,
+    is_live,
+    source_of,
+    validation_banner,
+)
 from src.question import Question
 from src.schema import (
     Dimension,
@@ -35,12 +41,18 @@ _AXES = ("A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4")
 
 
 def _provenance_tag(item: EvidenceItem) -> str:
-    """Every quantitative claim gets exactly one tag. Curated fixtures are
-    hand-entered from papers, so an item with a source is [RETRIEVED]; a bare
-    effect with no source would be [TRAINING - verify] (schema forbids that)."""
-    if item.source:
-        return "[RETRIEVED]"
-    return "[TRAINING - verify]"
+    """Exactly one provenance tag per quantitative claim, from the data source:
+    [RETRIEVED] for a live database figure (verify in-source), [UNVERIFIED] for a
+    curated placeholder citation."""
+    return source_of(item).provenance_tag
+
+
+def _cite_inline(item: EvidenceItem) -> str:
+    """Compact datasource citation shown next to each figure."""
+    src = source_of(item)
+    if is_live(item):
+        return f"↳ source: {src.name} ({src.citation}; doi:{src.doi}), accession `{item.provenance_group}` — {src.validation}"
+    return f"↳ source: `{item.source}` (primary paper) — {src.validation}"
 
 
 def _effect_str(item: EvidenceItem) -> str:
@@ -152,6 +164,10 @@ def to_markdown(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str
     L.append(f"\n> {appraisal.archetype_rationale}\n")
     L.append(f"**One-line:** {appraisal.verdict_line()}\n")
 
+    # Validation banner — online figures need in-source verification.
+    all_items = [it for a in appraisal.dimensions.values() for it in a.items]
+    L.append(f"> ⚠️ **Validation required.** {validation_banner(all_items)}\n")
+
     # 2. Estimand
     L.append("## 2. Causal question & estimand\n")
     L.append("Effect = M( system | do(X=a) ) − M( system | do(X=b) ), five slots filled:\n")
@@ -191,8 +207,9 @@ def to_markdown(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str
     if for_items:
         for it in for_items:
             L.append(f"- {_provenance_tag(it)} **{it.evidence_type.value}** ({it.dimension.value}, "
-                     f"{it.direction.value}): {_effect_str(it)} — `{it.source}` "
+                     f"{it.direction.value}): {_effect_str(it)} "
                      f"[{it.system.value}/{it.readout.value}]")
+            L.append(f"    - {_cite_inline(it)}")
             if it.assumptions_required:
                 L.append(f"    - load-bearing assumption(s): {', '.join(a.value for a in it.assumptions_required)}")
     else:
@@ -204,7 +221,8 @@ def to_markdown(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str
     if against_items:
         for it in against_items:
             L.append(f"- {_provenance_tag(it)} **{it.evidence_type.value}** ({it.dimension.value}, "
-                     f"{it.direction.value}): {_effect_str(it)} — `{it.source}`")
+                     f"{it.direction.value}): {_effect_str(it)}")
+            L.append(f"    - {_cite_inline(it)}")
             if it.notes:
                 L.append(f"    - {it.notes}")
     else:
@@ -232,6 +250,14 @@ def to_markdown(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str
 
     # 9. Databases -> named gaps
     L.append("## 9. Data & databases → named gaps\n")
+    used_sources = {source_of(it).id: source_of(it) for a in appraisal.dimensions.values() for it in a.items}
+    if used_sources:
+        L.append("**Sources queried this appraisal:**\n")
+        for src in used_sources.values():
+            L.append(f"- **{src.name}** — {src.access_class}; retrieval: {src.retrieval}. "
+                     f"Cite: {src.citation}" + (f" (doi:{src.doi})" if src.doi else "") + ".")
+        L.append("")
+    L.append("**Named gaps:**\n")
     if appraisal.not_examined:
         for d in appraisal.not_examined:
             L.append(f"- **Gap — {d.value}:** not queried in this run. {appraisal.stopped_because or ''}")
@@ -257,14 +283,15 @@ def to_markdown(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str
         L.append(f"- {lim}")
     L.append("")
 
-    # 12. References
+    # 12. References — primary source + the database it was retrieved from, each
+    # with its validation status. Nothing here is presented as a verified fact.
     L.append("## 12. References\n")
-    seen = {}
+    seen: dict[str, EvidenceItem] = {}
     for a in appraisal.dimensions.values():
         for it in a.items:
-            seen.setdefault(it.source, it.provenance_group)
-    for src, grp in seen.items():
-        L.append(f"- `{src}` — provenance group `{grp}` [unverified: curated placeholder, verify in-source]")
+            seen.setdefault(it.provenance_group, it)
+    for it in seen.values():
+        L.append(f"- {_provenance_tag(it)} `{it.source}` — {cite(it)}")
     L.append("")
 
     return "\n".join(L)
@@ -282,6 +309,8 @@ def to_html(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str:
     # Minimal markdown-ish -> HTML: escape, keep headings/lists/tables readable in <pre>.
     esc = html.escape(body_md)
     tier = appraisal.composite.value
+    all_items = [it for a in appraisal.dimensions.values() for it in a.items]
+    banner = html.escape(validation_banner(all_items))
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -291,6 +320,8 @@ def to_html(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str:
         padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }}
  .headline {{ background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.25rem; }}
  .tier {{ font-size: 1.4rem; font-weight: 700; color: #1e3a8a; }}
+ .validate {{ background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;
+        padding: 0.6rem 0.9rem; margin: 0.8rem 0; font-size: 13px; }}
  .chart {{ text-align: center; margin: 1.5rem 0; }}
  pre {{ white-space: pre-wrap; word-wrap: break-word; background: #f8fafc; padding: 1rem;
         border-radius: 8px; overflow-x: auto; font-size: 13px; }}
@@ -304,6 +335,7 @@ def to_html(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str:
        Scope: {html.escape(appraisal.context.describe())}</div>
   <div>Confidence: {html.escape(appraisal.posterior.render() if appraisal.posterior else 'not scored')}</div>
 </div>
+<div class="validate">⚠️ <b>Validation required.</b> {banner}</div>
 <div class="chart">{svg}
   <div class="legend"><span class="a">A1–A4 identification (the gate)</span>
        <span class="b">B1–B4 corroboration</span></div>
@@ -316,4 +348,19 @@ def to_json(appraisal: TargetAppraisal) -> str:
     payload = json.loads(appraisal.model_dump_json())
     payload["csp_profile"] = csp_profile(appraisal.dimensions)
     payload["verdict_line"] = appraisal.verdict_line()
+    all_items = [it for a in appraisal.dimensions.values() for it in a.items]
+    payload["provenance"] = {
+        "validation_banner": validation_banner(all_items),
+        "sources": [
+            {
+                "source": it.source,
+                "provenance_group": it.provenance_group,
+                "datasource": source_of(it).name,
+                "provenance_tag": source_of(it).provenance_tag,
+                "live": is_live(it),
+                "citation": cite(it),
+            }
+            for it in {it.provenance_group: it for a in appraisal.dimensions.values() for it in a.items}.values()
+        ],
+    }
     return json.dumps(payload, indent=2)

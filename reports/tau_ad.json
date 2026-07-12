@@ -1,0 +1,332 @@
+{
+  "target": "tau",
+  "disease": "Alzheimer's disease",
+  "context": {
+    "cell_type": null,
+    "tissue": null,
+    "background": null,
+    "ancestry": null,
+    "sex": null,
+    "disease_subtype": null,
+    "stage": null,
+    "dose": null,
+    "time": null
+  },
+  "dimensions": {
+    "association": {
+      "dimension": "association",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "tau_braak",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "association",
+          "evidence_type": "observational_cohort",
+          "direction": "target_up_disease_up",
+          "effect": {
+            "value": 1.9,
+            "ci_low": 1.6,
+            "ci_high": 2.3,
+            "units": "HR per Braak stage"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_unmeasured_confounding"
+          ],
+          "falsified_by": [
+            "Tangle burden fails to track cognitive decline"
+          ],
+          "source": "10.1093/brain/awv050",
+          "provenance_group": "tau_braak_staging",
+          "contradicts": [],
+          "notes": "Tangle burden and anatomical spread track decline -- what a proximate node does."
+        },
+        {
+          "id": "ot_ENSG00000186868_MONDO_0004975",
+          "target": "tau",
+          "disease": "Alzheimer disease",
+          "dimension": "association",
+          "evidence_type": "observational_cohort",
+          "direction": "null",
+          "effect": {
+            "value": 0.374,
+            "ci_low": null,
+            "ci_high": null,
+            "units": "OT association score (0-1)"
+          },
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Open Targets association score falls to ~0 on reingest"
+          ],
+          "source": "10.1093/nar/gkac1046",
+          "provenance_group": "opentargets_ENSG00000186868",
+          "contradicts": [],
+          "notes": "Integrated backbone score only. Direction-less by construction; contributes to strength/consistency, never a causal tier. datatype scores: {'literature': 1.0, 'genetic_association': 0.465, 'clinical': 0.19}"
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_unmeasured_confounding"
+      ],
+      "contradicting_items": [
+        {
+          "id": "ot_ENSG00000186868_MONDO_0004975",
+          "target": "tau",
+          "disease": "Alzheimer disease",
+          "dimension": "association",
+          "evidence_type": "observational_cohort",
+          "direction": "null",
+          "effect": {
+            "value": 0.374,
+            "ci_low": null,
+            "ci_high": null,
+            "units": "OT association score (0-1)"
+          },
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Open Targets association score falls to ~0 on reingest"
+          ],
+          "source": "10.1093/nar/gkac1046",
+          "provenance_group": "opentargets_ENSG00000186868",
+          "contradicts": [],
+          "notes": "Integrated backbone score only. Direction-less by construction; contributes to strength/consistency, never a causal tier. datatype scores: {'literature': 1.0, 'genetic_association': 0.465, 'clinical': 0.19}"
+        }
+      ],
+      "falsifiability": "Tangle burden fails to track cognitive decline"
+    },
+    "mediation": {
+      "dimension": "mediation",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "tau_mediation",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "mediation",
+          "evidence_type": "formal_mediation",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_mediator_outcome_confounding"
+          ],
+          "falsified_by": [
+            "Amyloid->cognition effect shown not to flow through tau"
+          ],
+          "source": "10.1002/ana.25395",
+          "provenance_group": "tau_mediation_path",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_mediator_outcome_confounding"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "Amyloid->cognition effect shown not to flow through tau"
+    },
+    "genetic": {
+      "dimension": "genetic",
+      "tier": "weak",
+      "items": [
+        {
+          "id": "tau_mapt_ad",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "genetic",
+          "evidence_type": "gwas_nearest_gene",
+          "direction": "null",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "MAPT variants shown to cause AD (not only FTD)"
+          ],
+          "source": "10.1038/ng.2802",
+          "provenance_group": "tau_mapt_gwas",
+          "contradicts": [],
+          "notes": "MAPT mutations cause FTD, not AD. Independent AD-specific genetic support is weak."
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [
+        {
+          "id": "tau_mapt_ad",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "genetic",
+          "evidence_type": "gwas_nearest_gene",
+          "direction": "null",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "MAPT variants shown to cause AD (not only FTD)"
+          ],
+          "source": "10.1038/ng.2802",
+          "provenance_group": "tau_mapt_gwas",
+          "contradicts": [],
+          "notes": "MAPT mutations cause FTD, not AD. Independent AD-specific genetic support is weak."
+        }
+      ],
+      "falsifiability": "MAPT variants shown to cause AD (not only FTD)"
+    },
+    "temporal": {
+      "dimension": "temporal",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "tau_temporal",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "temporal",
+          "evidence_type": "longitudinal_cohort",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "biomarker",
+          "assumptions_required": [
+            "no_reverse_causation"
+          ],
+          "falsified_by": [
+            "Tau-PET change shown not to precede cognitive decline"
+          ],
+          "source": "10.1126/scitranslmed.aau5732",
+          "provenance_group": "tau_pet_longitudinal",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_reverse_causation"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "Tau-PET change shown not to precede cognitive decline"
+    },
+    "mechanism": {
+      "dimension": "mechanism",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "tau_mech",
+          "target": "tau",
+          "disease": "Alzheimer's disease",
+          "dimension": "mechanism",
+          "evidence_type": "biochemical_pathway",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Tau aggregation shown mechanistically irrelevant to neurodegeneration"
+          ],
+          "source": "10.1146/annurev-neuro-072116-031153",
+          "provenance_group": "tau_propagation_mech",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "Tau aggregation shown mechanistically irrelevant to neurodegeneration"
+    }
+  },
+  "composite": "plausible",
+  "archetype": "downstream_mediator",
+  "inus": {
+    "necessity": "untested",
+    "sufficiency": "untested"
+  },
+  "posterior": {
+    "value": 0.11133025940201045,
+    "prior": 0.1,
+    "prior_source": "base rate for a strong biomarker with weak disease-specific genetics (curated set)",
+    "calibrated": false,
+    "reliability_bin": null
+  },
+  "archetype_rationale": "Strong association and a plausible mediating position combine with weak independent genetic support: an excellent biomarker but an uncertain target, because a mediator IS causal yet its position in the graph is a relation, not proof of primacy. For illustration, tau in Alzheimer's disease -- it tracks cognitive decline better than amyloid because it sits closer to the effector end of the chain, not because it is more causal.",
+  "next_experiment": "Formal mediation of the amyloid->cognition effect through tau with a genotype-anchored instrument, plus an AD-specific (not FTD) genetic test. Necessity/sufficiency for AD is the gap.",
+  "not_examined": [],
+  "stopped_because": null,
+  "conflicts": [],
+  "coarse_label_warning": false,
+  "known_limitations": [
+    "Effect depends on when you intervene; a static tier has no time axis.",
+    "Driver and mediator are both causal; position is a relation, not a coordinate.",
+    "Total and direct effects diverge; conditioning on a mediator can induce collider bias.",
+    "Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit."
+  ],
+  "csp_profile": {
+    "A1": 1,
+    "A2": 3,
+    "A3": 1,
+    "A4": 0,
+    "B1": 0,
+    "B2": 3,
+    "B3": 0,
+    "B4": 3
+  },
+  "verdict_line": "downstream_mediator [undetermined] | scope: unscoped (no context specified -- verdict is not context-conditional) | tier: plausible | likely non-causal, uncalibrated (prior 0.10 from base rate for a strong biomarker with weak disease-specific genetics (curated set))",
+  "provenance": {
+    "validation_banner": "1 figure(s) RETRIEVED live this session from Open Targets Platform \u2014 tagged [RETRIEVED]; verify each in-source before use. 5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) \u2014 tagged [UNVERIFIED]; replace from the primary paper before use.",
+    "sources": [
+      {
+        "source": "10.1093/brain/awv050",
+        "provenance_group": "tau_braak_staging",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1093/brain/awv050 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1093/nar/gkac1046",
+        "provenance_group": "opentargets_ENSG00000186868",
+        "datasource": "Open Targets Platform",
+        "provenance_tag": "[RETRIEVED]",
+        "live": true,
+        "citation": "retrieved from Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession opentargets_ENSG00000186868, A (open, keyless)"
+      },
+      {
+        "source": "10.1002/ana.25395",
+        "provenance_group": "tau_mediation_path",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1002/ana.25395 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1038/ng.2802",
+        "provenance_group": "tau_mapt_gwas",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1038/ng.2802 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1126/scitranslmed.aau5732",
+        "provenance_group": "tau_pet_longitudinal",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1126/scitranslmed.aau5732 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1146/annurev-neuro-072116-031153",
+        "provenance_group": "tau_propagation_mech",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1146/annurev-neuro-072116-031153 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      }
+    ]
+  }
+}

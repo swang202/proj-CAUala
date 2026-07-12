@@ -1,5 +1,7 @@
 # Causal Data-Source Catalog & Integration Plan
 
+> 🧭 **Reference — database catalog.** The genomics databases CAUala can draw on and how it reaches each. To actually wire one, see [CONNECTORS.md](CONNECTORS.md). Docs map: **[docs index](README.md)**.
+
 *Companion to the Report Spec. Purpose: turn each named evidence gap into a concrete, probe-able dataset — always preferring **raw data you can recompute** over quoted numbers. Classifies every source by how the tool reaches it, and lays out what to build.*
 
 Access verified via live search July 2026 (see Sources at end).

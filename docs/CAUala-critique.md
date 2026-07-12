@@ -1,5 +1,7 @@
 # proj-CAUala — Critique: Loopholes in the Logic and the Process
 
+> 🧭 **Understand — the reasoning stress-test.** The loopholes in the logic, found and closed before any code. Context: [../memo.md](../memo.md) and [../CONCEPTS.md](../CONCEPTS.md). Docs map: **[docs index](README.md)**.
+
 *A stress-test of the memo + README against the causal-inference framework, before you hand anything to an engineer. Read this first; the file rewrites and the build brief act on everything here.*
 
 The core instinct is right, and it is unusually well-posed: **most biology quietly reports association and narrates it as causation, and the cost of that error is measured in decades and fortunes and mistreated patients.** A tool that forces every "A causes B" claim to declare which evidence actually pins down *do*(A) — and which is just co-occurrence dressed in a mechanism story — is worth building. What follows is not disagreement; it is the set of places where the current logic will leak if it isn't tightened before code is written.

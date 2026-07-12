@@ -1,5 +1,7 @@
 # How I'm building this — a memo
 
+> 🧭 **Understand — motivation (best first read).** *Why* proj-CAUala exists and the problem it solves. Then read [README.md](README.md) (the *what*) and [CONCEPTS.md](CONCEPTS.md) (the *how* of the reasoning). Full map: **[docs/README.md](docs/README.md)**.
+
 *Working notes on why proj-CAUala exists, what problem it solves, and the reasoning it has to get right. This is the "why"; the README is the "what," and the build brief is the "how."*
 
 ## The one-line reason this matters, and the gap

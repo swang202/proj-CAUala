@@ -1,5 +1,7 @@
 # Causal Evidence Report — Specification & Scoring Rubric
 
+> 🧭 **Reference — report format & rubric.** The 12-section report house style and the 8-axis CSP scoring rubric. Implemented in `src/report.py` and `scoring/rubric.yaml`. Docs map: **[docs index](README.md)**.
+
 *House style for the causal-evidence review tool. Every report is generated to this template so outputs are consistent, auditable, and comparable across genes/diseases. Built from the v2 report set (the MS4A6A report is the reference bar).*
 
 ---

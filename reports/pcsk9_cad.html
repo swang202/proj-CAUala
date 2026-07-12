@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAUala — PCSK9 → coronary artery disease</title>
+<style>
+ body { font-family: -apple-system, system-ui, sans-serif; max-width: 900px; margin: 2rem auto;
+        padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+ .headline { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 1rem 1.25rem; }
+ .tier { font-size: 1.4rem; font-weight: 700; color: #1e3a8a; }
+ .validate { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;
+        padding: 0.6rem 0.9rem; margin: 0.8rem 0; font-size: 13px; }
+ .chart { text-align: center; margin: 1.5rem 0; }
+ pre { white-space: pre-wrap; word-wrap: break-word; background: #f8fafc; padding: 1rem;
+        border-radius: 8px; overflow-x: auto; font-size: 13px; }
+ .legend span { display: inline-block; margin-right: 1rem; font-size: 12px; }
+ .a { color: #2563eb; } .b { color: #0d9488; }
+</style></head><body>
+<div class="headline">
+  <div class="tier">Tier: causal_driver</div>
+  <div>Position: <b>validated_driver</b> ·
+       INUS: <b>necessary_and_sufficient</b> ·
+       Scope: unscoped (no context specified -- verdict is not context-conditional)</div>
+  <div>Confidence: likely causal, uncalibrated (prior 0.05 from base rate for a randomly chosen gene-disease pair (curated set))</div>
+</div>
+<div class="validate">⚠️ <b>Validation required.</b> 2 figure(s) RETRIEVED live this session from Open Targets Platform, gnomAD — tagged [RETRIEVED]; verify each in-source before use. 5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.</div>
+<div class="chart"><svg viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="Causal Strength Profile radar"><polygon points="160.0,121.6 187.2,132.8 198.4,160.0 187.2,187.2 160.0,198.4 132.8,187.2 121.6,160.0 132.8,132.8" fill="none" stroke="#c9d1d9" stroke-width="1"/><polygon points="160.0,83.2 214.3,105.7 236.8,160.0 214.3,214.3 160.0,236.8 105.7,214.3 83.2,160.0 105.7,105.7" fill="none" stroke="#c9d1d9" stroke-width="1"/><polygon points="160.0,44.8 241.5,78.5 275.2,160.0 241.5,241.5 160.0,275.2 78.5,241.5 44.8,160.0 78.5,78.5" fill="none" stroke="#c9d1d9" stroke-width="1"/><line x1="160.0" y1="160.0" x2="160.0" y2="44.8" stroke="#c9d1d9" stroke-width="1"/><text x="160.0" y="25.6" font-size="11" font-family="sans-serif" fill="#2563eb" text-anchor="middle" dominant-baseline="middle">A1</text><line x1="160.0" y1="160.0" x2="241.5" y2="78.5" stroke="#c9d1d9" stroke-width="1"/><text x="255.0" y="65.0" font-size="11" font-family="sans-serif" fill="#2563eb" text-anchor="middle" dominant-baseline="middle">A2</text><line x1="160.0" y1="160.0" x2="275.2" y2="160.0" stroke="#c9d1d9" stroke-width="1"/><text x="294.4" y="160.0" font-size="11" font-family="sans-serif" fill="#2563eb" text-anchor="middle" dominant-baseline="middle">A3</text><line x1="160.0" y1="160.0" x2="241.5" y2="241.5" stroke="#c9d1d9" stroke-width="1"/><text x="255.0" y="255.0" font-size="11" font-family="sans-serif" fill="#2563eb" text-anchor="middle" dominant-baseline="middle">A4</text><line x1="160.0" y1="160.0" x2="160.0" y2="275.2" stroke="#c9d1d9" stroke-width="1"/><text x="160.0" y="294.4" font-size="11" font-family="sans-serif" fill="#0d9488" text-anchor="middle" dominant-baseline="middle">B1</text><line x1="160.0" y1="160.0" x2="78.5" y2="241.5" stroke="#c9d1d9" stroke-width="1"/><text x="65.0" y="255.0" font-size="11" font-family="sans-serif" fill="#0d9488" text-anchor="middle" dominant-baseline="middle">B2</text><line x1="160.0" y1="160.0" x2="44.8" y2="160.0" stroke="#c9d1d9" stroke-width="1"/><text x="25.6" y="160.0" font-size="11" font-family="sans-serif" fill="#0d9488" text-anchor="middle" dominant-baseline="middle">B3</text><line x1="160.0" y1="160.0" x2="78.5" y2="78.5" stroke="#c9d1d9" stroke-width="1"/><text x="65.0" y="65.0" font-size="11" font-family="sans-serif" fill="#0d9488" text-anchor="middle" dominant-baseline="middle">B4</text><polygon points="160.0,44.8 241.5,78.5 236.8,160.0 214.3,214.3 160.0,160.0 160.0,160.0 160.0,160.0 78.5,78.5" fill="rgba(37,99,235,0.18)" stroke="#2563eb" stroke-width="2"/><circle cx="160.0" cy="44.8" r="2.5" fill="#2563eb"/><circle cx="241.5" cy="78.5" r="2.5" fill="#2563eb"/><circle cx="236.8" cy="160.0" r="2.5" fill="#2563eb"/><circle cx="214.3" cy="214.3" r="2.5" fill="#2563eb"/><circle cx="160.0" cy="160.0" r="2.5" fill="#2563eb"/><circle cx="160.0" cy="160.0" r="2.5" fill="#2563eb"/><circle cx="160.0" cy="160.0" r="2.5" fill="#2563eb"/><circle cx="78.5" cy="78.5" r="2.5" fill="#2563eb"/></svg>
+  <div class="legend"><span class="a">A1–A4 identification (the gate)</span>
+       <span class="b">B1–B4 corroboration</span></div>
+</div>
+<pre># Causal evidence appraisal — PCSK9 → coronary artery disease
+
+## 1. Verdict (BLUF)
+
+**Headline tier: `causal_driver`** — the gated ordinal verdict.
+
+- **Structural position:** `validated_driver`
+- **Necessity × sufficiency:** `necessary_and_sufficient` — Monogenic-like: alone required and enough. Rare.
+- **Scope:** unscoped (no context specified -- verdict is not context-conditional)
+- **Subordinate confidence:** likely causal, uncalibrated (prior 0.05 from base rate for a randomly chosen gene-disease pair (curated set)) *(never exceeds the tier; digits shown only once calibrated)*
+
+&gt; Converging bidirectional causal evidence -- loss- and gain-of-function pointing opposite ways -- together with a successful human intervention place the target on the causal path with the strongest support the framework assigns. For illustration, PCSK9 in coronary disease -- loss-of-function alleles protect, gain-of-function causes familial hypercholesterolemia, and PCSK9 inhibitors cut events in outcome trials.
+
+**One-line:** validated_driver [necessary_and_sufficient] | scope: unscoped (no context specified -- verdict is not context-conditional) | tier: causal_driver | likely causal, uncalibrated (prior 0.05 from base rate for a randomly chosen gene-disease pair (curated set))
+
+&gt; ⚠️ **Validation required.** 2 figure(s) RETRIEVED live this session from Open Targets Platform, gnomAD — tagged [RETRIEVED]; verify each in-source before use. 5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.
+
+## 2. Causal question &amp; estimand
+
+Effect = M( system | do(X=a) ) − M( system | do(X=b) ), five slots filled:
+
+- **X (intervened on):** PCSK9
+- **a vs b (contrast):** perturbed vs reference level of the target
+- **M (readout):** disease-relevant clinical outcome / endpoint
+- **system (held fixed):** unscoped (no context specified -- verdict is not context-conditional)
+- **population:** unspecified (flagged: generalization not assumed)
+
+## 3. Causal DAG (adjustment set in words)
+
+- **Exposure X:** PCSK9 · **Outcome Y:** coronary artery disease
+- **Instrument:** germline genotype (fixes direction; used by MR / genetic arms).
+- **Adjustment set (back-door):** condition on shared common causes of X and Y (e.g. age, ancestry principal components); **do NOT** condition on downstream mediators or post-onset measurements.
+- **Collider (do NOT adjust):** any selection node (survivorship in post-mortem cohorts, cell-line selection) — conditioning on it induces bias.
+
+## 4. Four-explanation checklist
+
+| # | Explanation | Design that addresses it | Status here |
+|---|---|---|---|
+| 1 | X → Y (causal) | MR + coloc; isogenic KI/rescue | supported |
+| 2 | Y → X (reverse) | instrument fixed at conception; longitudinal | addressed (genotype fixed at conception) |
+| 3 | Z → X, Z → Y (confound) | randomized / MR; conditional KO | addressed by genetic randomization |
+| 4 | X → S ← Y (collider) | population sampling; IPW | acknowledged, not fully modeled |
+
+## 5. Evidence FOR
+
+- [UNVERIFIED] **protective_allele** (genetic, target_down_disease_down): 0.12 OR (95% CI 0.03-0.45) [human/clinical_outcome]
+    - ↳ source: `PMID:16554528` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+    - load-bearing assumption(s): no_horizontal_pleiotropy
+- [UNVERIFIED] **rare_penetrant_variant** (genetic, target_up_disease_up): 2.8 OR (95% CI 1.9-4.1) [human/clinical_outcome]
+    - ↳ source: `10.1038/ng1161` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+- [UNVERIFIED] **human_rct** (intervention, target_down_disease_down): 0.85 HR (95% CI 0.79-0.92) [human/clinical_outcome]
+    - ↳ source: `PMID:28304224` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+- [UNVERIFIED] **human_rct** (intervention, target_down_disease_down): 0.85 HR (95% CI 0.78-0.93) [human/clinical_outcome]
+    - ↳ source: `PMID:30403574` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+- [UNVERIFIED] **biochemical_pathway** (mechanism, target_up_disease_up): no effect size on record [human/molecular_profile]
+    - ↳ source: `10.1074/jbc.M311730200` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+
+## 6. Evidence AGAINST / informative nulls
+
+- [RETRIEVED] **biochemical_pathway** (mechanism, null): 1.144 LOEUF (no CI)
+    - ↳ source: gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession `gnomad_constraint_PCSK9` — RETRIEVED live — constraint metric; confirm gene build/version and current gnomAD release before use.
+    - gnomAD GRCh38 constraint: LOEUF=1.1441346736692857, pLI=2.765187110917745e-18. LOF-tolerant (unconstrained; haploinsufficiency less likely). Plausibility only -- cannot raise the causal tier (invariant #2).
+- [RETRIEVED] **observational_cohort** (association, null): 0.718 OT association score (0-1) (no CI)
+    - ↳ source: Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession `opentargets_ENSG00000169174` — RETRIEVED live — integrated score, not a primary measurement; verify the underlying datatype evidence in-source before use.
+    - Integrated backbone score only. Direction-less by construction; contributes to strength/consistency, never a causal tier. datatype scores: {&#x27;literature&#x27;: 0.964, &#x27;genetic_association&#x27;: 0.907, &#x27;clinical&#x27;: 0.933}
+
+## 7. Causal Strength Profile (CSP)
+
+Identification gate: min(A1..A4) = **2** → gated tier **moderate** (controlled observation / single arm). Corroboration (B-axes) cannot lift this ceiling.
+
+| Axis | Score (0–3) | Family |
+|---|---|---|
+| A1 Confounding Robustness | 3 | identification |
+| A2 Reverse-Causation Robustness | 3 | identification |
+| A3 Selection Robustness | 2 | identification |
+| A4 Interventional Directness | 2 | identification |
+| B1 Dose-Response Gradient | 0 | corroboration |
+| B2 Temporal Precedence | 0 | corroboration |
+| B3 Replication Breadth | 0 | corroboration |
+| B4 Human Translatability | 3 | corroboration |
+
+## 8. Evidence hierarchy (by dimension tier)
+
+| Dimension | Tier | # items |
+|---|---|---|
+| association | moderate | 1 |
+| genetic | strong | 2 |
+| intervention | strong | 2 |
+| mechanism | moderate | 2 |
+
+## 9. Data &amp; databases → named gaps
+
+**Sources queried this appraisal:**
+
+- **Hand-curated literature fixture** — C (paper-attached); retrieval: curated offline record. Cite: see per-item DOI/PMID (TODO:cite placeholders).
+- **gnomAD** — A (open, keyless); retrieval: live GraphQL query this session. Cite: Karczewski et al., Nature 581:434 (2020) (doi:10.1038/s41586-020-2308-7).
+- **Open Targets Platform** — A (open, keyless); retrieval: live GraphQL query this session. Cite: Ochoa et al., Nucleic Acids Research 51:D1353 (2023) (doi:10.1093/nar/gkac1046).
+
+**Named gaps:**
+
+- No unexamined causal dimensions for this arrow.
+
+## 10. Experimental roadmap
+
+- **Next experiment (weakest, most cheaply strengthened):** None needed for causal status; bidirectional genetics and two positive outcome trials already converge. Remaining question is dose/timing optimization.
+
+## 11. Conclusions
+
+
+**Known limitations:**
+- Effect depends on when you intervene; a static tier has no time axis.
+- Driver and mediator are both causal; position is a relation, not a coordinate.
+- Total and direct effects diverge; conditioning on a mediator can induce collider bias.
+- Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit.
+
+## 12. References
+
+- [UNVERIFIED] `PMID:16554528` — PMID:16554528 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [UNVERIFIED] `10.1038/ng1161` — 10.1038/ng1161 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [UNVERIFIED] `PMID:28304224` — PMID:28304224 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [UNVERIFIED] `PMID:30403574` — PMID:30403574 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [UNVERIFIED] `10.1074/jbc.M311730200` — 10.1074/jbc.M311730200 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [RETRIEVED] `10.1038/s41586-020-2308-7` — retrieved from gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession gnomad_constraint_PCSK9, A (open, keyless)
+- [RETRIEVED] `10.1093/nar/gkac1046` — retrieved from Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession opentargets_ENSG00000169174, A (open, keyless)
+</pre>
+</body></html>

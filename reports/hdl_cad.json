@@ -1,0 +1,279 @@
+{
+  "target": "HDL-C",
+  "disease": "coronary artery disease",
+  "context": {
+    "cell_type": null,
+    "tissue": null,
+    "background": null,
+    "ancestry": null,
+    "sex": null,
+    "disease_subtype": null,
+    "stage": null,
+    "dose": null,
+    "time": null
+  },
+  "dimensions": {
+    "association": {
+      "dimension": "association",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "hdl_epi",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "association",
+          "evidence_type": "observational_cohort",
+          "direction": "target_up_disease_down",
+          "effect": {
+            "value": 0.78,
+            "ci_low": 0.74,
+            "ci_high": 0.82,
+            "units": "HR per SD"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_unmeasured_confounding"
+          ],
+          "falsified_by": [
+            "Association attenuates fully on adjustment"
+          ],
+          "source": "PMID:2642759",
+          "provenance_group": "hdl_framingham",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_unmeasured_confounding"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "Association attenuates fully on adjustment"
+    },
+    "genetic": {
+      "dimension": "genetic",
+      "tier": "contradicted",
+      "items": [
+        {
+          "id": "hdl_mr_null",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "genetic",
+          "evidence_type": "mendelian_randomization",
+          "direction": "null",
+          "effect": {
+            "value": 0.98,
+            "ci_low": 0.91,
+            "ci_high": 1.06,
+            "units": "OR per SD"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_horizontal_pleiotropy",
+            "instrument_relevance"
+          ],
+          "falsified_by": [
+            "MR with better instruments shows protective effect"
+          ],
+          "source": "10.1016/S0140-6736(12)60312-2",
+          "provenance_group": "hdl_mr_voight",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [
+        {
+          "id": "hdl_mr_null",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "genetic",
+          "evidence_type": "mendelian_randomization",
+          "direction": "null",
+          "effect": {
+            "value": 0.98,
+            "ci_low": 0.91,
+            "ci_high": 1.06,
+            "units": "OR per SD"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_horizontal_pleiotropy",
+            "instrument_relevance"
+          ],
+          "falsified_by": [
+            "MR with better instruments shows protective effect"
+          ],
+          "source": "10.1016/S0140-6736(12)60312-2",
+          "provenance_group": "hdl_mr_voight",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "falsifiability": "A causal-design null here would reverse only with better instruments."
+    },
+    "intervention": {
+      "dimension": "intervention",
+      "tier": "contradicted",
+      "items": [
+        {
+          "id": "cetp_fail",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "intervention",
+          "evidence_type": "human_rct",
+          "direction": "null",
+          "effect": {
+            "value": 1.02,
+            "ci_low": 0.93,
+            "ci_high": 1.12,
+            "units": "HR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "A CETP inhibitor reduces MACE via HDL raising"
+          ],
+          "source": "PMID:17984165",
+          "provenance_group": "cetp_illuminate",
+          "contradicts": [],
+          "notes": "Raised HDL substantially, no benefit. torcetrapib had off-target BP effects; dalcetrapib and evacetrapib were cleaner and still null."
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [
+        {
+          "id": "cetp_fail",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "intervention",
+          "evidence_type": "human_rct",
+          "direction": "null",
+          "effect": {
+            "value": 1.02,
+            "ci_low": 0.93,
+            "ci_high": 1.12,
+            "units": "HR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "A CETP inhibitor reduces MACE via HDL raising"
+          ],
+          "source": "PMID:17984165",
+          "provenance_group": "cetp_illuminate",
+          "contradicts": [],
+          "notes": "Raised HDL substantially, no benefit. torcetrapib had off-target BP effects; dalcetrapib and evacetrapib were cleaner and still null."
+        }
+      ],
+      "falsifiability": "A causal-design null here would reverse only with better instruments."
+    },
+    "mechanism": {
+      "dimension": "mechanism",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "hdl_mech",
+          "target": "HDL-C",
+          "disease": "coronary artery disease",
+          "dimension": "mechanism",
+          "evidence_type": "biochemical_pathway",
+          "direction": "target_up_disease_down",
+          "effect": null,
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Reverse cholesterol transport shown irrelevant to atherosclerosis"
+          ],
+          "source": "10.1161/CIRCRESAHA.111.258673",
+          "provenance_group": "hdl_rct_mech",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "Reverse cholesterol transport shown irrelevant to atherosclerosis"
+    }
+  },
+  "composite": "refuted",
+  "archetype": "associated_noncausal",
+  "inus": {
+    "necessity": "untested",
+    "sufficiency": "untested"
+  },
+  "posterior": {
+    "value": 0.015452079544639048,
+    "prior": 0.05,
+    "prior_source": "base rate for a randomly chosen biomarker-disease pair (curated set)",
+    "calibrated": false,
+    "reliability_bin": null
+  },
+  "archetype_rationale": "Strong, replicated association coexists with null or contradicted genetic and interventional evidence, the signature of a marker, not target: it tracks the outcome without sitting on any causal path to it. For illustration, HDL cholesterol in coronary disease -- decades of clean epidemiology, null Mendelian randomization, and three failed CETP-inhibitor trials.",
+  "next_experiment": "None would change the verdict: a pleiotropy-robust MR and three CETP-inhibitor outcome trials are already null. The marker is real; the target is not.",
+  "not_examined": [],
+  "stopped_because": null,
+  "conflicts": [
+    "Association is directional but genetics is null/contradicted: the correlation is real, its causal reading is not."
+  ],
+  "coarse_label_warning": false,
+  "known_limitations": [
+    "Effect depends on when you intervene; a static tier has no time axis.",
+    "Driver and mediator are both causal; position is a relation, not a coordinate.",
+    "Total and direct effects diverge; conditioning on a mediator can induce collider bias.",
+    "Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit."
+  ],
+  "csp_profile": {
+    "A1": 3,
+    "A2": 3,
+    "A3": 2,
+    "A4": 2,
+    "B1": 0,
+    "B2": 0,
+    "B3": 0,
+    "B4": 3
+  },
+  "verdict_line": "associated_noncausal [undetermined] | scope: unscoped (no context specified -- verdict is not context-conditional) | tier: refuted | likely non-causal, uncalibrated (prior 0.05 from base rate for a randomly chosen biomarker-disease pair (curated set))",
+  "provenance": {
+    "validation_banner": "4 figure(s) from curated fixtures carry placeholder citations (TODO:cite) \u2014 tagged [UNVERIFIED]; replace from the primary paper before use.",
+    "sources": [
+      {
+        "source": "PMID:2642759",
+        "provenance_group": "hdl_framingham",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "PMID:2642759 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1016/S0140-6736(12)60312-2",
+        "provenance_group": "hdl_mr_voight",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1016/S0140-6736(12)60312-2 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "PMID:17984165",
+        "provenance_group": "cetp_illuminate",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "PMID:17984165 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1161/CIRCRESAHA.111.258673",
+        "provenance_group": "hdl_rct_mech",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1161/CIRCRESAHA.111.258673 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      }
+    ]
+  }
+}

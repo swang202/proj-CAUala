@@ -1,0 +1,17 @@
+# Render.com blueprint. Push this repo to GitHub, then in Render:
+#   New + → Blueprint → pick the repo. It reads this file and deploys.
+# Free plan works; the free instance sleeps when idle and cold-starts on first hit.
+services:
+  - type: web
+    name: cauala
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.webapp:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: CAUALA_MAX_CONCURRENCY
+        value: "4"

@@ -1,5 +1,7 @@
 # proj-CAUala — implementation guide
 
+> 🧭 **Use & build — run it + architecture.** What shipped, how to run it (CLI + web + tests), and where each piece lives. New to the project? Start at [memo.md](memo.md). Full map: **[docs/README.md](docs/README.md)**.
+
 What was built against `build-brief.md`, how to run it, and where each piece of the
 brief lives in code. The architecture is the brief's **hybrid**: a deterministic
 Python core (retrieval + scoring + report), with the agent layer as a thin,
@@ -11,18 +13,40 @@ optional front-end that only parses free text into a `Question` and narrates —
 ```bash
 uv venv --python python3.11 .venv
 uv pip install --python .venv -e .          # or: pip install -r requirements.txt
-.venv/bin/python -m pytest tests/ -q        # 37 passing
-.venv/bin/python -m src.cli demo            # known-answer table
-.venv/bin/python -m src.cli validate        # calibration/separation harness
-.venv/bin/python -m src.cli appraise \
-    --source PCSK9 --target "coronary artery disease" --edge causal_risk --format md
+.venv/bin/python -m pytest tests/ -q        # 37 passing (+3 opt-in live, skipped)
+
+# the web app — a browser form, live progress, rendered report (easiest for non-CLI users):
+.venv/bin/python -m src.cli serve           # then open http://127.0.0.1:8000
+
+# the easy CLI path — two words, online by default (live Open Targets + gnomAD):
+.venv/bin/python -m src.cli appraise PCSK9 "coronary artery disease"
+
+.venv/bin/python -m src.cli demo            # known-answer table (offline, reproducible)
+.venv/bin/python -m src.cli validate        # calibration/separation harness (offline)
 .venv/bin/python -m src.cli export-schemas  # JSON Schemas -> ./schemas
 ```
 
-`appraise` also takes `--format json|html`, `--out FILE`, context flags
-(`--ancestry`, `--tissue`, `--cell-type`, `--disease-subtype`, `--stage`, `--sex`),
-and `--online` (enables the live Open Targets connector; offline it degrades to a
-named gap).
+The **web app** (`src/webapp.py`, FastAPI) is the friendliest entry point: type a
+gene and a disease, watch it stream *what it's looking at right now* (harmonize →
+query each database → tier → gate → classify) via Server-Sent Events, then read
+the rendered, cited, validation-flagged report in the page. It reuses
+`Orchestrator.appraise_events`, so the browser sees the exact CLI pipeline.
+Install the web extra with `uv pip install --python .venv -e '.[web]'`.
+
+**Hosting it as a public website:** the app reads `$PORT`/`$HOST`, has a
+`/healthz` check, CORS on the JSON API, and a concurrency cap. Ship-ready configs
+are in the repo root — `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, and a
+Hugging Face Space template — with step-by-step instructions for each host in
+[`docs/DEPLOY.md`](docs/DEPLOY.md). Note: it needs a Python-capable host (it runs
+server-side), so a pure static host like GitHub Pages will not work; Hugging Face
+Spaces or Render are the easiest free options.
+
+`appraise` is **online by default** — it queries live databases and every figure
+is cited to its source and tagged `[RETRIEVED]` (verify in-source) or `[UNVERIFIED]`
+(curated placeholder). Pass `--offline` to use only curated fixtures. It also takes
+`--format json|html`, `--out FILE`, and context flags (`--ancestry`, `--tissue`,
+`--cell-type`, `--disease-subtype`, `--stage`, `--sex`). See
+[`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the data-source list and how to add more.
 
 ## Module map
 
@@ -37,7 +61,9 @@ named gap).
 | §5 rubric | `scoring/rubric.yaml` | 8-axis CSP anchors, identification gate, per-type axis priors, named confounders. |
 | §6 report builder | `src/report.py` | JSON / Markdown / HTML in the 12-section order + inline-SVG spider chart. |
 | §7 validation harness | `src/validation.py`, `tests/test_pipeline.py` | Known-answer recovery + association-vs-causal separation. |
-| orchestration | `src/orchestrator.py` | Routes question → stack → connectors → scorer → appraisal, with VOI + gaps. |
+| orchestration | `src/orchestrator.py` | Routes question → stack → connectors → scorer → appraisal, with VOI + gaps; `appraise_events` streams progress. |
+| provenance & citation | `src/provenance.py` | Per-figure datasource citation + `[RETRIEVED]`/`[UNVERIFIED]` validation status. |
+| web app | `src/webapp.py` | FastAPI: form page + SSE progress stream + rendered report + JSON API. |
 | schema export | `src/export_schemas.py` | `model_json_schema()` → `schemas/*.json` (draft 2020-12). |
 
 ## How the discipline from the brief is enforced
@@ -90,10 +116,14 @@ The association-strong set `{HDL-C, CRP, tau}` and the causal-strong set
   sporadic-cohort evidence (LOF reduces but does not abolish) would move the arm to
   `sufficiency=refuted`. This is the conditional, context-dependent behaviour the
   tool is designed to expose, not a bug.
-- **Live connectors**: only Open Targets is wired for `--online`; the other rows in
-  the §3 catalog have registry entries and a uniform contract but are not yet
-  implemented. The offline FixtureConnector is the reproducible backbone the demo
-  and tests run against (recorded-fixture equivalent).
+- **Live connectors**: **Open Targets and gnomAD are wired and working** against
+  their real, keyless APIs (`--online`), including online ID resolution (via OT
+  `search`) and self-correcting EFO↔MONDO disease-id retry. The other rows in the
+  §3 catalog have registry entries and a uniform contract but are not yet
+  implemented — see [`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the recipe,
+  auth table, and env-var names for the keyed sources (OpenGWAS JWT, OMIM, CLUE).
+  The offline FixtureConnector remains the reproducible backbone for the demo and
+  tests.
 
 ## Phase status vs the brief roadmap
 

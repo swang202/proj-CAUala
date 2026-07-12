@@ -18,12 +18,13 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional
+from typing import AsyncIterator, Optional
 
 import yaml
 
 from src.connectors.base import CACHE
 from src.connectors.fixtures import CuratedCase, FixtureConnector
+from src.connectors.gnomad import GnomadConnector
 from src.connectors.opentargets import OpenTargetsConnector
 from src.harmonization import Harmonization, harmonize
 from src.question import Question
@@ -75,11 +76,12 @@ def load_registry() -> list[dict]:
 
 
 class Orchestrator:
-    def __init__(self, online: bool = False) -> None:
+    def __init__(self, online: bool = True) -> None:
         self.online = online
         self.registry = load_registry()
         self.fixtures = FixtureConnector()
         self.opentargets = OpenTargetsConnector(online=online)
+        self.gnomad = GnomadConnector(online=online)
 
     # -- registry matching --------------------------------------------------
 
@@ -108,10 +110,11 @@ class Orchestrator:
             items.extend(fetched)
             queried.append(self.fixtures.connector_id)
 
-        if self.online and self.opentargets.available_for(q):
-            ot = await self.opentargets.fetch(q)
-            items.extend(ot)
-            queried.append(self.opentargets.connector_id)
+        for connector in (self.opentargets, self.gnomad):
+            if self.online and connector.available_for(q):
+                fetched = await connector.fetch(q)
+                items.extend(fetched)
+                queried.append(connector.connector_id)
 
         case = self.fixtures.case_for(q)
         return items, queried, case
@@ -150,14 +153,75 @@ class Orchestrator:
 
     # -- main entry ---------------------------------------------------------
 
-    async def appraise(self, q: Question) -> TargetAppraisal:
+    def _resolve_online(self, q: Question) -> Question:
+        """When online and the offline table missed an id, resolve it via the Open
+        Targets search endpoint. Never fabricates -- an unresolved node stays so."""
+        source, target = q.source, q.target
+        if not source.is_resolved():
+            hit = self.opentargets.resolve(source.display(), "target")
+            if hit:
+                source = source.model_copy(update={"id": hit[0], "label": hit[1]})
+        if not target.is_resolved():
+            hit = self.opentargets.resolve(target.display(), "disease")
+            if hit:
+                target = target.model_copy(update={"id": hit[0], "label": hit[1]})
+        return q.model_copy(update={"source": source, "target": target})
+
+    async def appraise_events(self, q: Question) -> "AsyncIterator[dict]":
+        """Run the appraisal, yielding human-readable progress events as it goes.
+
+        Each yielded dict has a `stage` and a `detail`; the final event has
+        `stage == "done"` and carries the `appraisal`. This is what the web UI
+        streams so the user sees 'what it is looking at right now'. `appraise`
+        below consumes this so there is one source of truth for the pipeline.
+        """
+        yield {"stage": "start", "detail": f"Question: {q.describe()}"}
+
         harm: Harmonization = harmonize(q)
         q = harm.question
+        detail = f"Resolved: {q.source.display()} ({q.source.id or 'unresolved'}) → " \
+                 f"{q.target.display()} ({q.target.id or 'unresolved'})"
+        yield {"stage": "harmonize", "detail": detail, "warnings": harm.notes}
+
+        if self.online:
+            before = (q.source.id, q.target.id)
+            q = self._resolve_online(q)
+            if (q.source.id, q.target.id) != before:
+                yield {"stage": "resolve", "detail":
+                       f"Resolved online via Open Targets search → "
+                       f"{q.source.id or '?'} / {q.target.id or '?'}"}
 
         stack_entry = self.match_stack(q)
         stack = stack_entry["canonical_stack"] if stack_entry else []
+        if stack:
+            mods = ", ".join(m["modality"] for m in sorted(stack, key=lambda m: m["tier"]))
+            yield {"stage": "stack", "detail": f"Evidence stack for this arrow: {mods}"}
+        else:
+            yield {"stage": "stack", "detail": "No registered evidence stack for this question type."}
 
-        items, queried, case = await self._retrieve(q)
+        # Retrieval, connector by connector, so the user sees each source hit.
+        items: list[EvidenceItem] = []
+        mode = "online (live databases)" if self.online else "offline (curated fixtures)"
+        yield {"stage": "retrieve", "detail": f"Gathering evidence — {mode}."}
+
+        if self.fixtures.available_for(q):
+            fetched = await self.fixtures.fetch(q)
+            items.extend(fetched)
+            yield {"stage": "query", "connector": "curated",
+                   "detail": f"Curated evidence store: {len(fetched)} record(s) for this target."}
+
+        if self.online:
+            for connector in (self.opentargets, self.gnomad):
+                if connector.available_for(q):
+                    yield {"stage": "query", "connector": connector.connector_id,
+                           "detail": f"Querying {connector.connector_id}…"}
+                    fetched = await connector.fetch(q)
+                    items.extend(fetched)
+                    summ = self._summarize_fetch(connector.connector_id, fetched)
+                    yield {"stage": "query", "connector": connector.connector_id,
+                           "detail": summ, "found": len(fetched)}
+
+        case = self.fixtures.case_for(q)
 
         # Group retrieved items by dimension and assemble each.
         by_dim: dict[Dimension, list[EvidenceItem]] = {}
@@ -166,6 +230,12 @@ class Orchestrator:
         dimensions: dict[Dimension, DimensionAssessment] = {
             d: assemble_dimension(d, its) for d, its in by_dim.items()
         }
+        if dimensions:
+            tiers = ", ".join(f"{d.value}={a.tier.value}" for d, a in sorted(dimensions.items(), key=lambda kv: kv[0].value))
+            yield {"stage": "assemble", "detail": f"Tiered the evidence by dimension: {tiers}",
+                   "tiers": {d.value: a.tier.value for d, a in dimensions.items()}}
+        else:
+            yield {"stage": "assemble", "detail": "No evidence retrieved for this arrow."}
 
         # Walk the stack in retrieval-tier order; a modality is "examined" when its
         # dimension yielded evidence. VOI decides whether the rest were skipped.
@@ -181,6 +251,8 @@ class Orchestrator:
                 remaining.append(mod)
 
         composite = apply_gates(dimensions) if dimensions else Composite.UNVALIDATED
+        yield {"stage": "gate", "detail": f"Applied the identification gate → tier: {composite.value}",
+               "composite": composite.value}
 
         stopped_because: Optional[str] = None
         if remaining:
@@ -215,8 +287,11 @@ class Orchestrator:
             upstream_node_carries_signal=upstream,
             disease_area=disease_area,
         )
+        yield {"stage": "classify", "detail": f"Structural position: {archetype.value}",
+               "archetype": archetype.value}
 
         inus = derive_inus(dimensions)
+        yield {"stage": "finalize", "detail": "Deriving INUS box, subordinate posterior, and conflicts."}
 
         prior = case.prior if case else 0.05
         prior_source = case.prior_source if case else "default null base rate for gene-disease pairs"
@@ -252,7 +327,27 @@ class Orchestrator:
 
         # Invariant #8, enforced at the boundary: never emit a posterior above the gate.
         assert appraisal.posterior_respects_gate(), "posterior exceeded gated tier"
+        yield {"stage": "done", "detail": appraisal.verdict_line(), "appraisal": appraisal}
+
+    async def appraise(self, q: Question) -> TargetAppraisal:
+        """Run the full pipeline and return the appraisal (consumes appraise_events)."""
+        appraisal: Optional[TargetAppraisal] = None
+        async for event in self.appraise_events(q):
+            if event.get("stage") == "done":
+                appraisal = event["appraisal"]
+        assert appraisal is not None, "appraise_events did not yield a final appraisal"
         return appraisal
+
+    @staticmethod
+    def _summarize_fetch(connector_id: str, items: list[EvidenceItem]) -> str:
+        if not items:
+            return f"{connector_id}: no records (reported as a named gap, not silently dropped)."
+        it = items[0]
+        if connector_id == "opentargets" and it.effect:
+            return f"Open Targets: integrated association score {it.effect.value} (direction-less backbone)."
+        if connector_id == "gnomad" and it.effect:
+            return f"gnomAD: constraint LOEUF={it.effect.value} (plausibility gate only)."
+        return f"{connector_id}: {len(items)} record(s)."
 
     def appraise_sync(self, q: Question) -> TargetAppraisal:
         return asyncio.run(self.appraise(q))

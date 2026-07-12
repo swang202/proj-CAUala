@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.git/
+.gitignore
+.pytest_cache/
+.ruff_cache/
+reports/
+schemas/*.json
+*.duckdb
+*.parquet
+.DS_Store

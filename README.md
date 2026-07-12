@@ -12,6 +12,24 @@ CAUala takes a biological causal question, figures out *which arrow* is being as
 
 ---
 
+## 📚 Documentation — where to go next
+
+New here? The **[documentation map](docs/README.md)** routes you by what you want to
+do. The short version:
+
+| I want to… | Go to |
+|---|---|
+| **Use it** (CLI or the browser web app) | [IMPLEMENTATION.md](IMPLEMENTATION.md) |
+| **Understand the science** | [memo.md](memo.md) (why) → [CONCEPTS.md](CONCEPTS.md) (how) |
+| **Host it as a website** | [docs/DEPLOY.md](docs/DEPLOY.md) |
+| **Connect / add a database** | [docs/CONNECTORS.md](docs/CONNECTORS.md) |
+| **Read the engineering spec** | [build-brief.md](build-brief.md) |
+
+Every doc opens with a one-line **🧭 Role** banner so you always know what you're
+looking at.
+
+---
+
 ## The Causal Tree (Bradford Hill + Pearl, re-derived for molecular biology)
 
 **Pearl's ladder** sets the frame: Association (seeing) → Intervention (doing, *do*(X)) → Counterfactuals (imagining). CAUala's job is to move a claim **up** the ladder — from co-occurrence toward interventional and counterfactual support — and to score how far up the evidence actually reaches.
@@ -82,4 +100,9 @@ For each question, in the driver / passenger / bystander frame — **scoped to c
 Verdicts are only trustworthy if calibrated. Build the harness before trusting output: a **gold-standard positive set** (ClinGen "Definitive/Strong," OMIM monogenic), a **negative/hard set** (curated non-associations; retracted/failed-replication claims), calibration by confidence bin, and an external anchor (genetically-supported drug targets succeed ~2× more often — the tool should reproduce that separation).
 
 ## Status
-Design phase. See `CAUala-critique.md` (the reasoning stress-test), `memo.md` (the why), and `CAUala-build-brief.md` (the engineering handoff, with schemas and connector stubs).
+**Built and running.** The deterministic core (schema, gated scoring, archetype
+classifier), live database connectors (Open Targets + gnomAD), the report builder,
+a CLI, and a browser web app are all implemented and tested (26 known-answer tests
++ pipeline/web tests passing). See [IMPLEMENTATION.md](IMPLEMENTATION.md) for what
+shipped and how to run it, and the **[documentation map](docs/README.md)** for
+everything else.
