@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+
+# Generated JSON Schemas (regenerate with `cauala export-schemas`)
+/schemas/*.json
+
+# Local caches
+*.duckdb
+*.parquet

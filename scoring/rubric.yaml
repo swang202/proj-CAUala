@@ -1,0 +1,119 @@
+# The unified Causal Strength Profile (CSP) rubric -- 8 axes, each 0..3 anchors.
+# Matches the Report Spec section 5. Two families:
+#   Family A -- Identification ("did we rule out the rival explanations?")
+#   Family B -- Corroboration ("how strong is the positive signal?")
+#
+# The identification gate is the load-bearing rule: overall tier <= min(A1..A4).
+# A large corroboration score can never rescue weak identification. Per-claim,
+# each axis takes the BEST score any supporting study reaches on that axis, then
+# the gate is applied.
+
+axes:
+  A1:
+    name: Confounding Robustness
+    family: identification
+    scores:
+      0: none
+      1: adjust measured covariates
+      2: design limits it (isogenic / conditional)
+      3: eliminated by design (RCT / MR / randomized allele)
+  A2:
+    name: Reverse-Causation Robustness
+    family: identification
+    scores:
+      0: none
+      1: temporal ordering only
+      2: manipulation in a model system
+      3: instrument fixed before outcome (genotype / randomization)
+  A3:
+    name: Selection Robustness
+    family: identification
+    scores:
+      0: unexamined
+      1: acknowledged
+      2: partially modeled
+      3: population sampling or IPW; selection modeled explicitly
+  A4:
+    name: Interventional Directness
+    family: identification
+    scores:
+      0: pure observation
+      1: associational + covariates
+      2: one-shot perturbation do(X)
+      3: reversible in-system do(X) (degron / optogenetic on-off)
+  B1:
+    name: Dose-Response Gradient
+    family: corroboration
+    scores:
+      0: none
+      1: two-point (KO vs WT)
+      2: ordinal series
+      3: monotone graded titration (allelic series / CRISPRa-i curve)
+  B2:
+    name: Temporal Precedence
+    family: corroboration
+    scores:
+      0: unknown
+      1: cross-sectional guess
+      2: ordering in a model
+      3: precedence shown in longitudinal human data
+  B3:
+    name: Replication Breadth
+    family: corroboration
+    scores:
+      0: single study
+      1: two studies, one system
+      2: multiple independent labs
+      3: independent across systems and ancestries/models
+  B4:
+    name: Human Translatability
+    family: corroboration
+    scores:
+      0: in silico / non-mammalian
+      1: mouse model
+      2: human cells / tissue
+      3: human population or in-vivo human genetics
+
+# Map min(A1..A4) -> gated tier (Report Spec section 5 tier table).
+identification_gate:
+  0: {tier: association, meaning: correlation only}
+  1: {tier: suggestive,  meaning: association + mechanism}
+  2: {tier: moderate,    meaning: controlled observation / single arm}
+  3: {tier: strong,      meaning: quasi-experimental, one assumption open}
+  # >=3 on the binding axis PLUS replication -> definitive (checked separately)
+
+# Default 0..3 anchors used when an EvidenceType has no per-type override.
+# The scorer reads per-EvidenceType axis priors here; retrieved effect sizes and
+# provenance can only lower, never invent, these.
+evidence_type_axis_priors:
+  human_rct:                {A1: 3, A2: 3, A3: 2, A4: 2, B4: 3}
+  human_cell_perturbation:  {A1: 2, A2: 2, A3: 1, A4: 2, B4: 2}
+  animal_perturbation:      {A1: 2, A2: 2, A3: 1, A4: 2, B4: 1}
+  rare_penetrant_variant:   {A1: 3, A2: 3, A3: 1, A4: 1, B4: 3}
+  protective_allele:        {A1: 3, A2: 3, A3: 1, A4: 1, B4: 3}
+  allelic_series:           {A1: 3, A2: 3, A3: 1, A4: 1, B1: 3, B4: 3}
+  mendelian_randomization:  {A1: 3, A2: 3, A3: 1, A4: 1, B4: 3}
+  gwas_colocalization:      {A1: 2, A2: 3, A3: 1, A4: 0, B4: 3}
+  gwas_nearest_gene:        {A1: 1, A2: 3, A3: 1, A4: 0, B4: 3}   # a locus, not a target
+  longitudinal_cohort:      {A1: 1, A2: 1, A3: 1, A4: 0, B2: 3, B4: 3}
+  anchored_onset_cohort:    {A1: 1, A2: 2, A3: 1, A4: 0, B2: 3, B4: 3}
+  formal_mediation:         {A1: 1, A2: 1, A3: 1, A4: 0, B4: 2}
+  pathway_epistasis:        {A1: 2, A2: 2, A3: 1, A4: 2, B4: 1}
+  biochemical_pathway:      {A1: 0, A2: 0, A3: 0, A4: 0, B4: 1}   # plausibility only
+  expression_concordance:   {A1: 0, A2: 0, A3: 0, A4: 0, B4: 1}   # no direction
+  cross_sectional:          {A1: 0, A2: 0, A3: 0, A4: 0, B4: 2}   # no direction
+  observational_cohort:     {A1: 1, A2: 0, A3: 1, A4: 0, B4: 2}
+  replication:              {B3: 3}
+  sensitivity_analysis:     {A1: 1, A2: 1}
+
+# Named signature confounder + its test, keyed to data type (build-brief section 5.5).
+# Each modality has ONE named confounder to hunt, not a generic sweep.
+confounder_signatures:
+  mendelian_randomization: {confounder: horizontal_pleiotropy, test: MR-Egger / weighted-median intercept}
+  gwas_colocalization:     {confounder: LD_contamination,      test: conditional / SuSiE credible sets}
+  gwas_nearest_gene:       {confounder: wrong_gene_at_locus,   test: fine-mapping + coloc to the effector gene}
+  human_cell_perturbation: {confounder: off_target,            test: multiple guides / rescue}
+  l1000_signature:         {confounder: batch,                 test: replicate plates / z-vs-control}
+  observational_cohort:    {confounder: unmeasured_confounding, test: negative controls / E-value}
+  longitudinal_cohort:     {confounder: reverse_causation,     test: cross-lagged / genotype-anchored}
+  cross_sectional:         {confounder: reverse_causation,     test: none available -- direction not licensed}

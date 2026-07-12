@@ -1,0 +1,61 @@
+# Question ontology -> evidence-stack registry (build-brief section 2).
+#
+# For each (source, target, edge) the ranked list of modalities that can
+# establish THAT arrow. The `tier` here is the RETRIEVAL PRIOR: how much causal
+# weight a modality *can* carry for this arrow. It is NOT the per-item score --
+# the deterministic scorer still assigns each retrieved item's actual tier from
+# its evidence quality. `gives_direction: false` modalities are subject to the
+# directionality gate: they contribute to strength/consistency only, never to
+# temporality, direction, or the driver-vs-mediator call.
+#
+# The orchestrator matches the parsed question to one entry, queries the
+# modalities in tier order, and stops per the value-of-information rule.
+#
+# tier legend (retrieval prior, 1 strongest .. 5 weakest):
+#   1 randomized human intervention / gold-standard curation
+#   2 nature's randomization with pleiotropy control (MR)
+#   3 single perturbation / colocalization (the do-operator, once)
+#   4 fine-mapped genetic association / longitudinal ordering
+#   5 cross-sectional / co-expression  -> hypothesis only, no direction
+
+stacks:
+  - match: {source: variant, target: disease, edge: genetic_risk}
+    canonical_stack:
+      - {modality: mendelian_randomization, tier: 2, gives_direction: true,  connector: opengwas}
+      - {modality: eqtl_coloc,              tier: 3, gives_direction: true,  connector: eqtl_catalogue}
+      - {modality: gwas_finemap,            tier: 4, gives_direction: true,  connector: gwas_catalog}
+      - {modality: clinvar_omim_curation,   tier: 1, gives_direction: true,  connector: clinvar}
+      - {modality: constraint_gate,         tier: 4, gives_direction: false, connector: gnomad}
+    key_confounders: [LD, population_stratification, winners_curse]
+
+  - match: {source: gene, target: disease, edge: causal_risk}
+    canonical_stack:
+      - {modality: clinvar_omim_curation,   tier: 1, gives_direction: true,  connector: clinvar}
+      - {modality: mendelian_randomization, tier: 2, gives_direction: true,  connector: opengwas}
+      - {modality: eqtl_coloc,              tier: 3, gives_direction: true,  connector: eqtl_catalogue}
+      - {modality: gwas_finemap,            tier: 4, gives_direction: true,  connector: gwas_catalog}
+      - {modality: integrated_backbone,     tier: 4, gives_direction: true,  connector: opentargets}
+    key_confounders: [LD, population_stratification, reverse_causation, coarse_disease_label]
+
+  - match: {source: gene, target: gene, edge: regulatory}
+    canonical_stack:
+      - {modality: perturb_seq,       tier: 3, gives_direction: true,  connector: scperturb}
+      - {modality: crispr_ko_depmap,  tier: 3, gives_direction: true,  connector: depmap}
+      - {modality: l1000_signature,   tier: 3, gives_direction: true,  connector: lincs_l1000}
+      - {modality: eqtl_transacting,  tier: 4, gives_direction: true,  connector: eqtl_catalogue}
+      - {modality: coexpression,      tier: 5, gives_direction: false, connector: cellxgene}  # hypothesis only
+    key_confounders: [batch, cell_type_composition, indirect_mediation]
+
+  - match: {source: disease, target: gene, edge: causal_effect}   # the reverse-causation trap
+    canonical_stack:
+      - {modality: mendelian_randomization_reverse, tier: 2, gives_direction: true,  connector: opengwas}
+      - {modality: longitudinal_omics,              tier: 4, gives_direction: true,  connector: cellxgene}
+      - {modality: case_control_deg,                tier: 5, gives_direction: false, connector: europepmc}
+    key_confounders: [reverse_causation, cell_type_composition, medication_effects]
+
+  - match: {source: drug, target: phenotype, edge: causal_effect}
+    canonical_stack:
+      - {modality: rct,                                tier: 1, gives_direction: true,  connector: europepmc}
+      - {modality: mendelian_randomization_drugtarget, tier: 2, gives_direction: true,  connector: opengwas}
+      - {modality: l1000_signature,                    tier: 3, gives_direction: true,  connector: lincs_l1000}
+    key_confounders: [placebo, off_target, indication_bias]

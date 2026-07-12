@@ -1,0 +1,335 @@
+# Curated evidence store -- the offline "recorded fixture" evidence source.
+#
+# CURATION WARNING (identical discipline to tests/test_known_answers.py):
+# effect sizes, PMIDs and DOIs marked `# TODO:cite` are PLACEHOLDERS carried over
+# from the known-answer fixtures or added by hand. They must be replaced from
+# papers actually read before this leaves the repo. A hallucinated citation would
+# undercut the entire assumption-forward, evidence-inspectable thesis of the tool.
+# The STRUCTURE of each case -- which dimensions are strong/null and which way the
+# evidence points -- is the part that encodes the known answer and is correct as
+# written. The deterministic assembler re-tiers these items from scratch; nothing
+# here hand-sets a causal tier.
+#
+# The FixtureConnector serves these items so `variant/gene -> disease` questions
+# run end-to-end with real records, no network. Each case also records the
+# pathway fact `upstream_node_carries_signal` (which cannot be derived from a
+# target's own evidence) and the base-rate prior for the subordinate posterior.
+
+cases:
+  # -------------------------------------------------------------------------
+  - target: PCSK9
+    disease: coronary artery disease
+    target_aliases: [PCSK9, ENSG00000169174]
+    disease_aliases: [coronary artery disease, cad, chd, coronary heart disease, cardiovascular disease]
+    disease_area: cardiovascular
+    upstream_node_carries_signal: false
+    prior: 0.05
+    prior_source: base rate for a randomly chosen gene-disease pair (curated set)
+    next_experiment: >-
+      None needed for causal status; bidirectional genetics and two positive
+      outcome trials already converge. Remaining question is dose/timing optimization.
+    evidence:
+      - id: pcsk9_lof
+        dimension: genetic
+        evidence_type: protective_allele
+        direction: target_down_disease_down
+        effect: {value: 0.12, ci_low: 0.03, ci_high: 0.45, units: OR}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_horizontal_pleiotropy]
+        falsified_by: ["LOF carriers show no reduction in CHD incidence"]
+        source: "PMID:16554528"        # TODO:cite -- Cohen et al. NEJM 2006
+        provenance_group: pcsk9_lof_aric
+      - id: pcsk9_gof
+        dimension: genetic
+        evidence_type: rare_penetrant_variant
+        direction: target_up_disease_up
+        effect: {value: 2.8, ci_low: 1.9, ci_high: 4.1, units: OR}
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["GOF carriers show normal LDL and normal CHD risk"]
+        source: "10.1038/ng1161"        # TODO:cite -- Abifadel et al. 2003
+        provenance_group: pcsk9_gof_fh
+      - id: pcsk9_fourier
+        dimension: intervention
+        evidence_type: human_rct
+        direction: target_down_disease_down
+        effect: {value: 0.85, ci_low: 0.79, ci_high: 0.92, units: HR}
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["No reduction in MACE despite LDL lowering"]
+        source: "PMID:28304224"         # TODO:cite -- FOURIER, evolocumab
+        provenance_group: pcsk9_fourier
+      - id: pcsk9_odyssey
+        dimension: intervention
+        evidence_type: human_rct
+        direction: target_down_disease_down
+        effect: {value: 0.85, ci_low: 0.78, ci_high: 0.93, units: HR}
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["A second PCSK9-inhibitor trial shows no MACE benefit"]
+        source: "PMID:30403574"         # TODO:cite -- ODYSSEY OUTCOMES, alirocumab
+        provenance_group: pcsk9_odyssey
+      - id: pcsk9_mech
+        dimension: mechanism
+        evidence_type: biochemical_pathway
+        direction: target_up_disease_up
+        system: human
+        readout: molecular_profile
+        falsified_by: ["PCSK9 shown not to regulate hepatic LDL-receptor turnover"]
+        source: "10.1074/jbc.M311730200"  # TODO:cite -- PCSK9 degrades LDLR
+        provenance_group: pcsk9_ldlr_mech
+
+  # -------------------------------------------------------------------------
+  - target: HDL-C
+    disease: coronary artery disease
+    target_aliases: [HDL-C, HDL, HDL cholesterol, CETP]
+    disease_aliases: [coronary artery disease, cad, chd, cardiovascular disease]
+    disease_area: cardiovascular
+    upstream_node_carries_signal: false
+    prior: 0.05
+    prior_source: base rate for a randomly chosen biomarker-disease pair (curated set)
+    next_experiment: >-
+      None would change the verdict: a pleiotropy-robust MR and three CETP-inhibitor
+      outcome trials are already null. The marker is real; the target is not.
+    evidence:
+      - id: hdl_epi
+        dimension: association
+        evidence_type: observational_cohort
+        direction: target_up_disease_down
+        effect: {value: 0.78, ci_low: 0.74, ci_high: 0.82, units: HR per SD}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_unmeasured_confounding]
+        falsified_by: ["Association attenuates fully on adjustment"]
+        source: "PMID:2642759"          # TODO:cite -- Framingham
+        provenance_group: hdl_framingham
+      - id: hdl_mr_null
+        dimension: genetic
+        evidence_type: mendelian_randomization
+        direction: "null"
+        effect: {value: 0.98, ci_low: 0.91, ci_high: 1.06, units: OR per SD}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_horizontal_pleiotropy, instrument_relevance]
+        falsified_by: ["MR with better instruments shows protective effect"]
+        source: "10.1016/S0140-6736(12)60312-2"  # TODO:cite -- Voight 2012
+        provenance_group: hdl_mr_voight
+      - id: cetp_fail
+        dimension: intervention
+        evidence_type: human_rct
+        direction: "null"
+        effect: {value: 1.02, ci_low: 0.93, ci_high: 1.12, units: HR}
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["A CETP inhibitor reduces MACE via HDL raising"]
+        source: "PMID:17984165"         # TODO:cite -- ILLUMINATE / dal-OUTCOMES / ACCELERATE
+        provenance_group: cetp_illuminate
+        notes: >-
+          Raised HDL substantially, no benefit. torcetrapib had off-target BP
+          effects; dalcetrapib and evacetrapib were cleaner and still null.
+      - id: hdl_mech
+        dimension: mechanism
+        evidence_type: biochemical_pathway
+        direction: target_up_disease_down
+        system: human
+        readout: molecular_profile
+        falsified_by: ["Reverse cholesterol transport shown irrelevant to atherosclerosis"]
+        source: "10.1161/CIRCRESAHA.111.258673"  # TODO:cite -- reverse cholesterol transport
+        provenance_group: hdl_rct_mech
+
+  # -------------------------------------------------------------------------
+  - target: CRP
+    disease: coronary artery disease
+    target_aliases: [CRP, C-reactive protein]
+    disease_aliases: [coronary artery disease, cad, chd, cardiovascular disease]
+    disease_area: cardiovascular
+    upstream_node_carries_signal: true      # IL-6 receptor carries the causal signal, one node up
+    prior: 0.05
+    prior_source: base rate for a randomly chosen biomarker-disease pair (curated set)
+    next_experiment: >-
+      Colocalize and MR the IL6R locus against CHD; the causal test belongs on the
+      upstream node (IL-6 signalling), not on CRP itself. CRP-specific instruments
+      are already null.
+    evidence:
+      - id: crp_epi
+        dimension: association
+        evidence_type: observational_cohort
+        direction: target_up_disease_up
+        effect: {value: 1.50, ci_low: 1.31, ci_high: 1.72, units: HR per SD}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_unmeasured_confounding]
+        falsified_by: ["CRP association attenuates fully on adjustment for IL-6"]
+        source: "10.1016/S0140-6736(09)61717-7"  # TODO:cite -- Emerging Risk Factors Collab
+        provenance_group: crp_erfc
+      - id: crp_mr_null
+        dimension: genetic
+        evidence_type: mendelian_randomization
+        direction: "null"
+        effect: {value: 1.00, ci_low: 0.90, ci_high: 1.13, units: OR per SD}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_horizontal_pleiotropy]
+        falsified_by: ["CRP-raising variants increase CHD risk"]
+        source: "10.1136/bmj.d548"      # TODO:cite -- CRP CHD Genetics Collaboration
+        provenance_group: crp_mr_collab
+        notes: "IL6R variants, by contrast, ARE associated with CHD risk."
+      - id: crp_mech
+        dimension: mechanism
+        evidence_type: biochemical_pathway
+        direction: target_up_disease_up
+        system: human
+        readout: molecular_profile
+        falsified_by: ["CRP shown to have no role in the IL-6 inflammatory axis"]
+        source: "10.1038/nri.2017.103"  # TODO:cite -- IL-6 / CRP inflammatory axis
+        provenance_group: crp_il6_mech
+
+  # -------------------------------------------------------------------------
+  - target: APP/amyloid
+    disease: Alzheimer's disease
+    target_aliases: [APP, amyloid, APP/amyloid, ENSG00000142192, abeta]
+    disease_aliases: [alzheimer's disease, alzheimer disease, ad, alzheimers, alzheimer]
+    disease_area: neurology
+    upstream_node_carries_signal: false
+    prior: 0.10
+    prior_source: base rate for a gene with prior monogenic evidence (curated set)
+    next_experiment: >-
+      A prevention-arm trial in mutation carriers (do(clear amyloid) BEFORE symptom
+      onset). The modest late-intervention benefit is exactly what an early
+      initiator predicts; the untested contrast is early intervention.
+    evidence:
+      - id: app_dominant
+        dimension: genetic
+        evidence_type: rare_penetrant_variant
+        direction: target_up_disease_up
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["APP mutation carriers do not develop AD"]
+        source: "10.1038/349704a0"      # TODO:cite -- Goate et al. 1991
+        provenance_group: app_adad
+      - id: app_a673t
+        dimension: genetic
+        evidence_type: protective_allele
+        direction: target_down_disease_down
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["A673T carriers show normal AD incidence"]
+        source: "10.1038/nature11283"   # TODO:cite -- Jonsson et al. 2012
+        provenance_group: app_iceland
+        notes: >-
+          Same gene, opposite direction: reduces Abeta production and lowers AD
+          risk. The causal unit is a specific perturbation of one processing pathway.
+      - id: amyloid_plaque_xsec
+        dimension: association
+        evidence_type: cross_sectional
+        direction: target_up_disease_up
+        system: human
+        readout: disease_pathology
+        assumptions_required: [no_selection_bias]
+        falsified_by: ["Plaque burden shown to correlate tightly with cognition"]
+        source: "10.1212/WNL.0b013e31820af900"  # TODO:cite -- plaque-cognition discordance
+        provenance_group: amyloid_plaque_autopsy
+        notes: >-
+          Plaque burden correlates poorly with cognitive status; many cognitively
+          normal elderly carry heavy plaque load. Weak, and direction-less by design.
+      - id: dian_cascade
+        dimension: temporal
+        evidence_type: anchored_onset_cohort
+        direction: target_up_disease_up
+        system: human
+        readout: biomarker
+        assumptions_required: [no_selection_bias]
+        falsified_by: ["Amyloid change follows rather than precedes tau"]
+        source: "10.1056/NEJMoa1202753"  # TODO:cite -- Bateman 2012 DIAN
+        provenance_group: dian_bateman
+        notes: >-
+          Mutation carriers have predictable onset -- a natural time axis anchored to
+          a known driver. Amyloid changes decades before tau, before cognition.
+      - id: lecanemab
+        dimension: intervention
+        evidence_type: human_rct
+        direction: target_down_disease_down
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["Amyloid clearance yields zero clinical benefit"]
+        source: "10.1056/NEJMoa2212948"  # TODO:cite -- CLARITY-AD, lecanemab
+        provenance_group: lecanemab_clarity
+        notes: >-
+          Real but MODEST benefit -- exactly what an upstream, early-acting initiator
+          predicts when intervened on late. Single trial, contested magnitude.
+      - id: amyloid_mech
+        dimension: mechanism
+        evidence_type: biochemical_pathway
+        direction: target_up_disease_up
+        system: human
+        readout: molecular_profile
+        falsified_by: ["Amyloid cascade hypothesis mechanistically refuted"]
+        source: "10.15252/emmm.201606210"  # TODO:cite -- amyloid cascade review
+        provenance_group: amyloid_cascade_mech
+
+  # -------------------------------------------------------------------------
+  - target: tau
+    disease: Alzheimer's disease
+    target_aliases: [tau, MAPT, tangles]
+    disease_aliases: [alzheimer's disease, alzheimer disease, ad, alzheimers, alzheimer]
+    disease_area: neurology
+    upstream_node_carries_signal: false
+    prior: 0.10
+    prior_source: base rate for a strong biomarker with weak disease-specific genetics (curated set)
+    next_experiment: >-
+      Formal mediation of the amyloid->cognition effect through tau with a
+      genotype-anchored instrument, plus an AD-specific (not FTD) genetic test.
+      Necessity/sufficiency for AD is the gap.
+    evidence:
+      - id: tau_braak
+        dimension: association
+        evidence_type: observational_cohort
+        direction: target_up_disease_up
+        effect: {value: 1.9, ci_low: 1.6, ci_high: 2.3, units: HR per Braak stage}
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_unmeasured_confounding]
+        falsified_by: ["Tangle burden fails to track cognitive decline"]
+        source: "10.1093/brain/awv050"  # TODO:cite -- Braak staging vs cognition
+        provenance_group: tau_braak_staging
+        notes: "Tangle burden and anatomical spread track decline -- what a proximate node does."
+      - id: tau_mediation
+        dimension: mediation
+        evidence_type: formal_mediation
+        direction: target_up_disease_up
+        system: human
+        readout: clinical_outcome
+        assumptions_required: [no_mediator_outcome_confounding]
+        falsified_by: ["Amyloid->cognition effect shown not to flow through tau"]
+        source: "10.1002/ana.25395"     # TODO:cite -- amyloid-tau-cognition mediation
+        provenance_group: tau_mediation_path
+      - id: tau_mapt_ad
+        dimension: genetic
+        evidence_type: gwas_nearest_gene
+        direction: "null"
+        system: human
+        readout: clinical_outcome
+        falsified_by: ["MAPT variants shown to cause AD (not only FTD)"]
+        source: "10.1038/ng.2802"       # TODO:cite -- MAPT->FTD, weak AD-specific signal
+        provenance_group: tau_mapt_gwas
+        notes: "MAPT mutations cause FTD, not AD. Independent AD-specific genetic support is weak."
+      - id: tau_temporal
+        dimension: temporal
+        evidence_type: longitudinal_cohort
+        direction: target_up_disease_up
+        system: human
+        readout: biomarker
+        assumptions_required: [no_reverse_causation]
+        falsified_by: ["Tau-PET change shown not to precede cognitive decline"]
+        source: "10.1126/scitranslmed.aau5732"  # TODO:cite -- tau-PET longitudinal
+        provenance_group: tau_pet_longitudinal
+      - id: tau_mech
+        dimension: mechanism
+        evidence_type: biochemical_pathway
+        direction: target_up_disease_up
+        system: human
+        readout: molecular_profile
+        falsified_by: ["Tau aggregation shown mechanistically irrelevant to neurodegeneration"]
+        source: "10.1146/annurev-neuro-072116-031153"  # TODO:cite -- tau propagation mechanism
+        provenance_group: tau_propagation_mech

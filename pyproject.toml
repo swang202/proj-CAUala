@@ -1,0 +1,30 @@
+[project]
+name = "cauala"
+version = "0.1.0"
+description = "proj-CAUala — retrieve real genomics evidence for a causal question A→B|context, score it through a causal (not associational) lens, and return a gated ordinal verdict with a subordinate calibrated posterior and a falsifiable roadmap."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.5",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+cauala = "src.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src", "src.connectors"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
