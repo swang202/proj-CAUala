@@ -12,22 +12,18 @@ Most of biology quietly measures **association** and then narrates it as
 **causation**. That mistake is expensive — and CAUala is built to stop it.
 
 Causality is hard to hold onto. This tool exists to help you climb as close to it
-as the available evidence allows, and to be honest about how close that is. The
-cost of getting it wrong is real:
+as the available evidence allows, and to be honest about how close that is. The cost
+of getting it wrong is real: chasing a passenger target for a decade, giving a
+patient a drug that can't help them, or building on a mechanism that doesn't hold.
 
-- you don't want to **chase a target for ten years and a fortune**, only to find it
-  was a passenger, not a driver;
-- you don't want to **give a patient a drug that can't help them**, because their
-  disease isn't actually driven by that target;
-- you don't want to **build on a shaky mechanism** chained together from a handful
-  of experiments.
+**And biology breaks the standard rules for causation.** The textbook tests were
+built for single-exposure epidemiology, and molecular biology hands you a
+counterexample to each of them.
 
-And causality in biology is **conditional, not fixed**. The same gene can be causal
-in one cell type, ancestry, or disease stage and irrelevant in another; a
-disease-causing mutation can be silenced by a second, protective one. So CAUala
-never gives a bare yes/no. It gives a **conditional claim** — *A → B, given this
-context* — with its evidence, its uncertainty, and the experiment that would settle
-it.
+A tool that applies one fixed rule is confidently wrong on exactly the cases that
+matter most. So CAUala doesn't: it **fits the evidence standard to the question** —
+the arrow you're asking about decides which evidence can settle it — and it always
+answers **conditionally** (`A → B | context`), never with a context-free yes/no.
 
 > The deeper motivation (and why the textbook causal rules break in molecular
 > biology) is in **[memo.md](memo.md)**; the reasoning framework is in
