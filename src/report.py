@@ -177,30 +177,38 @@ def spider_svg(profile: dict[str, int], min_ident: int, size: int = 360) -> str:
     pad = size * 0.16
     cx = cy = size / 2
     radius = (size - 2 * pad) / 2
+    # Inner hole: value 0 sits on its own small ring rather than collapsing onto the
+    # exact center, so a profile with several zeros still reads as one connected
+    # octagon instead of a degenerate star. Accuracy is preserved -- 0 is a labelled ring.
+    r0 = radius * 0.13
     n = len(_AXES)
 
-    def point(i: int, value: float, scale: float = 1.0) -> tuple[float, float]:
+    def rr(value: float) -> float:
+        return r0 + (radius - r0) * (value / 3.0)
+
+    def point(i: int, value: float) -> tuple[float, float]:
         angle = -math.pi / 2 + 2 * math.pi * i / n
-        r = radius * (value / 3.0) * scale
+        r = rr(value)
         return cx + r * math.cos(angle), cy + r * math.sin(angle)
 
     parts = [
         f'<svg viewBox="0 0 {size} {size}" class="radar" role="img" '
         f'aria-label="Causal Strength Profile radar, 8 axes scored 0 to 3">'
     ]
-    # grid rings
-    for ring in (1, 2, 3):
+    # grid rings, including the 0 ring (innermost)
+    for ring in (0, 1, 2, 3):
         pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in (point(i, ring) for i in range(n)))
-        parts.append(f'<polygon points="{pts}" class="ring"/>')
+        cls = "ring ring0" if ring == 0 else "ring"
+        parts.append(f'<polygon points="{pts}" class="{cls}"/>')
     # gate ring: the identification ceiling. Corroboration beyond it cannot lift the tier.
-    if min_ident < 3:
+    if 0 < min_ident < 3:
         gpts = " ".join(f"{x:.1f},{y:.1f}" for x, y in (point(i, min_ident) for i in range(n)))
         parts.append(f'<polygon points="{gpts}" class="gate"/>')
     # spokes + ring scale numbers (up the top axis)
     for i in range(n):
         x, y = point(i, 3)
         parts.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{x:.1f}" y2="{y:.1f}" class="spoke"/>')
-    for ring in (1, 2, 3):
+    for ring in (0, 1, 2, 3):
         _, ry = point(0, ring)
         parts.append(f'<text x="{cx + 4:.1f}" y="{ry:.1f}" class="ringlab">{ring}</text>')
     # axis labels
@@ -528,6 +536,7 @@ h1{font-size:20px;margin:0 0 2px} h2{font-size:16px;margin:34px 0 12px}
 .radar-wrap{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
 .radar{width:100%;max-width:360px;height:auto}
 .radar .ring{fill:none;stroke:var(--grid);stroke-width:1}
+.radar .ring0{opacity:.6}
 .radar .spoke{stroke:var(--grid);stroke-width:1}
 .radar .gate{fill:none;stroke:var(--critical);stroke-width:1.6;stroke-dasharray:4 3;opacity:.75}
 .radar .axlab{font:650 12px system-ui}
@@ -579,6 +588,14 @@ def to_html(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str:
     min_ident = min(profile[a] for a in ident_axes)
     binding = [RUBRIC["axes"][a]["name"] for a in ident_axes if profile[a] == min_ident]
     binding_clause = f", here <b>{_esc(', '.join(binding))}</b>" if binding else ""
+    if min_ident == 0:
+        gate_lead = (f"Identification is at the floor (A1–A4 min = 0 of 3){binding_clause}: "
+                     "no rival explanation has been ruled out yet, so no causal tier can be earned.")
+    elif min_ident < 3:
+        gate_lead = (f"The dashed ring marks the weakest identification axis "
+                     f"(A1–A4 min = {min_ident} of 3){binding_clause}.")
+    else:
+        gate_lead = "Identification is strong on every axis (A1–A4 all reach 3)."
     svg = spider_svg(profile, min_ident)
     for_items, against_items = _split_for_against(appraisal)
     tier = appraisal.composite.value
@@ -695,7 +712,7 @@ def to_html(appraisal: TargetAppraisal, q: Optional[Question] = None) -> str:
       <ul class="axis-list">{axis_rows}</ul>
     </div>
   </div>
-  <p class="meaning" style="margin-top:12px"><b>The identification gate.</b> The dashed ring sits at the weakest identification axis (A1–A4 min = {min_ident} of 3){binding_clause}. Identification is the ceiling on any causal claim: however large the corroboration shape grows on the B side, it cannot make up for a gap on the A side. That is why the <i>shape</i> of this profile matters more than its area — two targets with the same area can be identified very differently.</p>
+  <p class="meaning" style="margin-top:12px"><b>The identification gate.</b> {gate_lead} Identification is the ceiling on any causal claim: however large the corroboration shape grows on the B side, it cannot make up for a gap on the A side. That is why the <i>shape</i> of this profile matters more than its area — two targets with the same area can be identified very differently.</p>
 </div>
 
 <h2>Data sources &amp; how they were analyzed</h2>

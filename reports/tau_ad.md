@@ -11,7 +11,7 @@
 
 > Strong association and a plausible mediating position combine with weak independent genetic support: an excellent biomarker but an uncertain target, because a mediator IS causal yet its position in the graph is a relation, not proof of primacy. For illustration, tau in Alzheimer's disease -- it tracks cognitive decline better than amyloid because it sits closer to the effector end of the chain, not because it is more causal.
 
-> ⚠️ **Validation required.** 5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.
+> ⚠️ **Validation required.** 2 figure(s) RETRIEVED live this session from Open Targets Platform, gnomAD — tagged [RETRIEVED]; verify each in-source before use. 5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.
 
 ## 2. Causal question & estimand
 
@@ -34,8 +34,12 @@
 
 ## 4. Evidence AGAINST / informative nulls
 
+- [RETRIEVED] **observational_cohort** (association, null): 0.374 OT association score (0-1) (no CI)
+    - ↳ source: Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession `opentargets_ENSG00000186868` — RETRIEVED live — integrated score, not a primary measurement; verify the underlying datatype evidence in-source before use.
 - [UNVERIFIED] **gwas_nearest_gene** (genetic, null): no effect size on record
     - ↳ source: `10.1038/ng.2802` (primary paper) — UNVERIFIED — placeholder citation (TODO:cite); replace from the primary paper before any real use.
+- [RETRIEVED] **biochemical_pathway** (mechanism, null): 0.666 LOEUF (no CI)
+    - ↳ source: gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession `gnomad_constraint_MAPT` — RETRIEVED live — constraint metric; confirm gene build/version and current gnomAD release before use.
 
 ## 5. Causal Strength Profile (CSP)
 
@@ -53,6 +57,8 @@ Weakest identification axis (A1..A4 min) = **0/3** (Interventional Directness). 
 ## 6. Data & databases
 
 - **Hand-curated literature fixture** — C (paper-attached); curated offline record. Cite: see per-item DOI/PMID (TODO:cite placeholders)
+- **Open Targets Platform** — A (open, keyless); live GraphQL query this session. Cite: Ochoa et al., Nucleic Acids Research 51:D1353 (2023)
+- **gnomAD** — A (open, keyless); live GraphQL query this session. Cite: Karczewski et al., Nature 581:434 (2020)
 
 ## 7. What would change the verdict
 
@@ -61,7 +67,9 @@ Weakest identification axis (A1..A4 min) = **0/3** (Interventional Directness). 
 ## 8. References
 
 - [UNVERIFIED] `10.1093/brain/awv050` — 10.1093/brain/awv050 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [RETRIEVED] `10.1093/nar/gkac1046` — retrieved from Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession opentargets_ENSG00000186868, A (open, keyless)
 - [UNVERIFIED] `10.1002/ana.25395` — 10.1002/ana.25395 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1038/ng.2802` — 10.1038/ng.2802 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1126/scitranslmed.aau5732` — 10.1126/scitranslmed.aau5732 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1146/annurev-neuro-072116-031153` — 10.1146/annurev-neuro-072116-031153 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [RETRIEVED] `10.1038/s41586-020-2308-7` — retrieved from gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession gnomad_constraint_MAPT, A (open, keyless)

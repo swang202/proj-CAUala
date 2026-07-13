@@ -49,7 +49,10 @@ class GnomadConnector:
     async def fetch(self, q: Question) -> list[EvidenceItem]:
         if not self.available_for(q):
             return []
-        symbol = q.source.symbol or q.source.display()
+        # Prefer the canonical gene symbol resolved by harmonization (node.label,
+        # e.g. "MAPT") over the free-text entry ("tau", "APP/amyloid"), which gnomAD
+        # would not recognise.
+        symbol = q.source.label or q.source.symbol or q.source.display()
         # gnomAD rate-limits (~10 req/min); retry with small backoff before giving up.
         import asyncio
 

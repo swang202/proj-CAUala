@@ -11,7 +11,7 @@
 
 > Strong genetic causal support pairs with weak concurrent correlation, the signature of a node that acts early in the cascade and whose association to the measured outcome decays as causal distance grows. For illustration, amyloid in Alzheimer's disease -- bidirectional genetics, changes decades before symptoms, yet weak concurrent correlation with cognition.
 
-> ⚠️ **Validation required.** 6 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.
+> ⚠️ **Validation required.** 2 figure(s) RETRIEVED live this session from Open Targets Platform, gnomAD — tagged [RETRIEVED]; verify each in-source before use. 6 figure(s) from curated fixtures carry placeholder citations (TODO:cite) — tagged [UNVERIFIED]; replace from the primary paper before use.
 
 ## 2. Causal question & estimand
 
@@ -38,7 +38,10 @@
 
 ## 4. Evidence AGAINST / informative nulls
 
-- No informative nulls on record.
+- [RETRIEVED] **observational_cohort** (association, null): 0.807 OT association score (0-1) (no CI)
+    - ↳ source: Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession `opentargets_ENSG00000142192` — RETRIEVED live — integrated score, not a primary measurement; verify the underlying datatype evidence in-source before use.
+- [RETRIEVED] **biochemical_pathway** (mechanism, null): 0.413 LOEUF (no CI)
+    - ↳ source: gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession `gnomad_constraint_APP` — RETRIEVED live — constraint metric; confirm gene build/version and current gnomAD release before use.
 
 ## 5. Causal Strength Profile (CSP)
 
@@ -56,6 +59,8 @@ Weakest identification axis (A1..A4 min) = **2/3** (Selection Robustness, Interv
 ## 6. Data & databases
 
 - **Hand-curated literature fixture** — C (paper-attached); curated offline record. Cite: see per-item DOI/PMID (TODO:cite placeholders)
+- **Open Targets Platform** — A (open, keyless); live GraphQL query this session. Cite: Ochoa et al., Nucleic Acids Research 51:D1353 (2023)
+- **gnomAD** — A (open, keyless); live GraphQL query this session. Cite: Karczewski et al., Nature 581:434 (2020)
 
 ## 7. What would change the verdict
 
@@ -66,6 +71,8 @@ Weakest identification axis (A1..A4 min) = **2/3** (Selection Robustness, Interv
 - [UNVERIFIED] `10.1038/349704a0` — 10.1038/349704a0 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1038/nature11283` — 10.1038/nature11283 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1212/WNL.0b013e31820af900` — 10.1212/WNL.0b013e31820af900 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [RETRIEVED] `10.1093/nar/gkac1046` — retrieved from Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession opentargets_ENSG00000142192, A (open, keyless)
 - [UNVERIFIED] `10.1056/NEJMoa1202753` — 10.1056/NEJMoa1202753 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.1056/NEJMoa2212948` — 10.1056/NEJMoa2212948 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
 - [UNVERIFIED] `10.15252/emmm.201606210` — 10.15252/emmm.201606210 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]
+- [RETRIEVED] `10.1038/s41586-020-2308-7` — retrieved from gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession gnomad_constraint_APP, A (open, keyless)
