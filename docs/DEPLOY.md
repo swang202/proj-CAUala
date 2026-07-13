@@ -32,15 +32,66 @@ files for the common hosts ship in the repo root.
 | **Google Cloud Run** | pay-per-use, generous free | scales to zero, containers | `Dockerfile` |
 | **Any Docker host / your VPS** | your box | full control | `Dockerfile` |
 
-### A. Hugging Face Spaces (recommended for this audience)
+### A. Hugging Face Spaces (recommended — no command line needed)
 
-1. Push CAUala to a GitHub repo (or you'll upload files directly).
-2. On huggingface.co → **New → Space** → SDK **Docker** → blank template.
-3. Add all repo files to the Space, **including `Dockerfile`**.
-4. Replace the Space's `README.md` with `deploy/huggingface-space-README.md`
-   (its frontmatter sets `sdk: docker`, `app_port: 7860`).
-5. Push. The Space builds the Dockerfile and goes live at
-   `https://huggingface.co/spaces/<you>/cauala`. Share that URL.
+You can do this entirely in a web browser. End result: a public URL anyone can visit.
+
+**Step 1 — Make a free Hugging Face account.** Go to <https://huggingface.co/join>,
+sign up, confirm your email.
+
+**Step 2 — Create the Space.** Go to <https://huggingface.co/new-space> and set:
+- **Owner:** your username. **Space name:** `cauala` (this becomes part of the URL).
+- **License:** optional (e.g. MIT).
+- **Select the Space SDK:** click **Docker**, then the **Blank** template.
+- **Space hardware:** **CPU basic — Free**.
+- **Visibility:** **Public**.
+- Click **Create Space**.
+
+**Step 3 — Upload the project files.** On the new Space page open the **Files** tab
+→ **+ Add file** → **Upload files**. From Finder, **drag these in, keeping the
+folders intact** — this is the minimum the app needs to run:
+- `Dockerfile`
+- `requirements.txt`
+- the `src` folder
+- the `registry` folder
+- the `scoring` folder
+
+**Do NOT upload the project's own `README.md`** — keep the one Hugging Face created
+for you (it holds the config the Space needs). Then scroll down and click
+**Commit changes to main**.
+> If your browser won't let you drag a whole folder, upload one folder at a time:
+> Upload files → drag `src` → commit; repeat for `registry` and `scoring`.
+
+**Step 4 — Let it build.** The Space rebuilds automatically after the commit. A
+**Building** badge appears (top right); it takes ~2–5 minutes. Click **Logs** to
+watch progress if you like.
+
+**Step 5 — Open and share.** When the badge turns to **Running**, the app appears on
+the page. Your public URL is `https://huggingface.co/spaces/<your-username>/cauala`
+— share that. (Free Spaces sleep after a couple of idle days and wake on the next
+visit, ~30 s cold start.)
+
+**If the Space shows a "config error" or a blank/timeout screen:** open the **Files**
+tab, click `README.md`, click the pencil (edit), and make sure the very top of the
+file is exactly this block (then commit) — it tells the Space to serve on port 7860,
+which is what the app listens on:
+
+```
+---
+title: CAUala
+emoji: 🐨
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+```
+
+A ready-made copy is in [`deploy/huggingface-space-README.md`](../deploy/huggingface-space-README.md).
+
+**Updating later:** edit any file from the **Files** tab (or re-upload it) and
+commit — each commit triggers a rebuild.
 
 ### B. Render
 
