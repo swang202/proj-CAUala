@@ -1,0 +1,28 @@
+{
+  "$defs": {
+    "NSAxis": {
+      "description": "One arm of the INUS sub-field, scored independently from evidence subtype.",
+      "enum": [
+        "supported",
+        "refuted",
+        "untested"
+      ],
+      "title": "NSAxis",
+      "type": "string"
+    }
+  },
+  "description": "The necessity x sufficiency sub-field, carried alongside the position label.\n\nNecessity and sufficiency are scored on SEPARATE axes (loss-of-function vs\ngain-of-function evidence) and only then combined into a box. Keeping the two\narms visible is the point -- the two middle boxes look identical in a naive\ncorrelation but have opposite therapeutic meaning.",
+  "properties": {
+    "necessity": {
+      "$ref": "#/$defs/NSAxis",
+      "default": "untested"
+    },
+    "sufficiency": {
+      "$ref": "#/$defs/NSAxis",
+      "default": "untested"
+    }
+  },
+  "title": "InusVerdict",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

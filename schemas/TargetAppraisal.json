@@ -1,0 +1,629 @@
+{
+  "$defs": {
+    "Archetype": {
+      "description": "The differentiator. A score is forgettable; \"your target sits on no causal\npath despite strong association\" is not.\n\nValues are STRUCTURAL, not exemplar-named. The archetype describes a shape\nin the dimension vector, and that shape is disease-agnostic. Exemplars\n(HDL, tau, amyloid) appear only in rationale text as illustrations, and\nonly when the disease area makes them legible to the reader.\n\nA cancer researcher should never be told their target has \"the tau pattern.\"",
+      "enum": [
+        "associated_noncausal",
+        "displaced_signal",
+        "upstream_initiator",
+        "downstream_mediator",
+        "reactive_consequence",
+        "untested",
+        "validated_driver"
+      ],
+      "title": "Archetype",
+      "type": "string"
+    },
+    "Assumption": {
+      "description": "Untestable conditions required for the evidence to license a causal claim.\nEvery causal estimate is assumption-conditional. Surfacing which assumption\nis doing the work is the point of the tool.",
+      "enum": [
+        "no_unmeasured_confounding",
+        "no_horizontal_pleiotropy",
+        "instrument_relevance",
+        "exclusion_restriction",
+        "no_mediator_outcome_confounding",
+        "no_reverse_causation",
+        "model_validity",
+        "correct_dag",
+        "positivity",
+        "sutva",
+        "measured_species_is_active_species",
+        "no_selection_bias"
+      ],
+      "title": "Assumption",
+      "type": "string"
+    },
+    "Composite": {
+      "description": "Ceiling is set by the strongest causal-evidence tier present.\nAssociation + mechanism alone caps at UNVALIDATED regardless of strength.",
+      "enum": [
+        "causal_driver",
+        "likely_causal",
+        "plausible",
+        "unvalidated",
+        "likely_noncausal",
+        "refuted"
+      ],
+      "title": "Composite",
+      "type": "string"
+    },
+    "Context": {
+      "description": "The conditional scope. The atomic claim is `A -> B | context`, never a bare\n\"A causes B\". Every slot may be null; a null slot means \"unspecified / not\nscoped\", NOT \"any\". Generalization beyond the observed context is flagged,\nnever assumed.",
+      "properties": {
+        "cell_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell Type"
+        },
+        "tissue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tissue"
+        },
+        "background": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Background"
+        },
+        "ancestry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ancestry"
+        },
+        "sex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sex"
+        },
+        "disease_subtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Disease Subtype"
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stage"
+        },
+        "dose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dose"
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time"
+        }
+      },
+      "title": "Context",
+      "type": "object"
+    },
+    "Dimension": {
+      "description": "The seven causal questions. Note these are questions, not data types.",
+      "enum": [
+        "intervention",
+        "genetic",
+        "temporal",
+        "mediation",
+        "mechanism",
+        "association",
+        "robustness"
+      ],
+      "title": "Dimension",
+      "type": "string"
+    },
+    "DimensionAssessment": {
+      "description": "One dimension's verdict, with everything needed to defend it.",
+      "properties": {
+        "dimension": {
+          "$ref": "#/$defs/Dimension"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "assumptions_load_bearing": {
+          "description": "Which assumptions, if violated, would change this tier",
+          "items": {
+            "$ref": "#/$defs/Assumption"
+          },
+          "title": "Assumptions Load Bearing",
+          "type": "array"
+        },
+        "contradicting_items": {
+          "description": "Surfaced, never averaged away",
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Contradicting Items",
+          "type": "array"
+        },
+        "falsifiability": {
+          "default": "",
+          "description": "What would drop this tier",
+          "title": "Falsifiability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "tier",
+        "items"
+      ],
+      "title": "DimensionAssessment",
+      "type": "object"
+    },
+    "Direction": {
+      "description": "Sign of the causal claim. Bidirectional evidence -- increase harms AND\ndecrease protects -- is jointly far stronger than either alone.",
+      "enum": [
+        "target_up_disease_up",
+        "target_down_disease_down",
+        "target_up_disease_down",
+        "target_down_disease_up",
+        "null"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "EffectSize": {
+      "description": "Effect with uncertainty. Confidence is tracked separately from magnitude:\n'confident it is small' and 'no idea if it is large' are different states.",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "ci_low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Low"
+        },
+        "ci_high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci High"
+        },
+        "units": {
+          "description": "e.g. 'OR per SD', 'hazard ratio', 'log2FC'",
+          "title": "Units",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "units"
+      ],
+      "title": "EffectSize",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "description": "The atomic unit. Every tier decomposes into these; every one must be\nclickable through to a source.\n\nCuration note: effect sizes and citations are hand-curated from papers\nactually read. A hallucinated PMID would undercut the entire\nassumption-forward thesis of the tool.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "disease": {
+          "title": "Disease",
+          "type": "string"
+        },
+        "dimension": {
+          "$ref": "#/$defs/Dimension"
+        },
+        "evidence_type": {
+          "$ref": "#/$defs/EvidenceType"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "effect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EffectSize"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "system": {
+          "$ref": "#/$defs/System"
+        },
+        "readout": {
+          "$ref": "#/$defs/Readout"
+        },
+        "assumptions_required": {
+          "description": "What must hold for this to license a causal claim",
+          "items": {
+            "$ref": "#/$defs/Assumption"
+          },
+          "title": "Assumptions Required",
+          "type": "array"
+        },
+        "falsified_by": {
+          "description": "Plain-language: what result would kill this item",
+          "items": {
+            "type": "string"
+          },
+          "title": "Falsified By",
+          "type": "array"
+        },
+        "source": {
+          "description": "DOI or PMID. Required. No exceptions.",
+          "title": "Source",
+          "type": "string"
+        },
+        "provenance_group": {
+          "description": "Ten papers citing one original observation is ONE piece of evidence. Items sharing a provenance_group are de-duplicated before scoring.",
+          "title": "Provenance Group",
+          "type": "string"
+        },
+        "contradicts": {
+          "description": "ids of EvidenceItems this conflicts with",
+          "items": {
+            "type": "string"
+          },
+          "title": "Contradicts",
+          "type": "array"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        }
+      },
+      "required": [
+        "id",
+        "target",
+        "disease",
+        "dimension",
+        "evidence_type",
+        "direction",
+        "system",
+        "readout",
+        "source",
+        "provenance_group"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "EvidenceType": {
+      "description": "Specific study designs. Ordering within a dimension matters for tiering.",
+      "enum": [
+        "human_rct",
+        "human_cell_perturbation",
+        "animal_perturbation",
+        "rare_penetrant_variant",
+        "protective_allele",
+        "allelic_series",
+        "mendelian_randomization",
+        "gwas_colocalization",
+        "gwas_nearest_gene",
+        "longitudinal_cohort",
+        "anchored_onset_cohort",
+        "formal_mediation",
+        "pathway_epistasis",
+        "biochemical_pathway",
+        "expression_concordance",
+        "cross_sectional",
+        "observational_cohort",
+        "replication",
+        "sensitivity_analysis"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "InusVerdict": {
+      "description": "The necessity x sufficiency sub-field, carried alongside the position label.\n\nNecessity and sufficiency are scored on SEPARATE axes (loss-of-function vs\ngain-of-function evidence) and only then combined into a box. Keeping the two\narms visible is the point -- the two middle boxes look identical in a naive\ncorrelation but have opposite therapeutic meaning.",
+      "properties": {
+        "necessity": {
+          "$ref": "#/$defs/NSAxis",
+          "default": "untested"
+        },
+        "sufficiency": {
+          "$ref": "#/$defs/NSAxis",
+          "default": "untested"
+        }
+      },
+      "title": "InusVerdict",
+      "type": "object"
+    },
+    "NSAxis": {
+      "description": "One arm of the INUS sub-field, scored independently from evidence subtype.",
+      "enum": [
+        "supported",
+        "refuted",
+        "untested"
+      ],
+      "title": "NSAxis",
+      "type": "string"
+    },
+    "Posterior": {
+      "description": "The subordinate confidence estimate. Governed by three hard rules from DESIGN:\n  1. it may NEVER exceed the gated tier (a posterior cannot overrule identification);\n  2. until calibrated, it renders as a band/bin, never a bare float;\n  3. it shows digits only when calibrated, and then WITH reliability provenance.\n\n`render()` enforces rule 2/3. Do not read `.value` for display -- use render().",
+      "properties": {
+        "value": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Value",
+          "type": "number"
+        },
+        "prior": {
+          "description": "Base rate used; report it explicitly",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Prior",
+          "type": "number"
+        },
+        "prior_source": {
+          "description": "Where the prior came from (curated set? constraint? network distance?)",
+          "title": "Prior Source",
+          "type": "string"
+        },
+        "calibrated": {
+          "default": false,
+          "title": "Calibrated",
+          "type": "boolean"
+        },
+        "reliability_bin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. '0.9 bin, observed hit-rate 0.88 on ClinGen gold set'",
+          "title": "Reliability Bin"
+        }
+      },
+      "required": [
+        "value",
+        "prior",
+        "prior_source"
+      ],
+      "title": "Posterior",
+      "type": "object"
+    },
+    "Readout": {
+      "description": "What was measured, ordered by distance from what the patient experiences.\n\nCLINICAL_OUTCOME is disease-agnostic by construction: it means survival,\nfunction, symptom burden, or event incidence -- whatever the disease's\nendpoint is. Do not add disease-specific readouts here; put the specific\nmeasure in EvidenceItem.notes.",
+      "enum": [
+        "clinical_outcome",
+        "surrogate_endpoint",
+        "disease_pathology",
+        "biomarker",
+        "molecular_profile",
+        "cellular_phenotype"
+      ],
+      "title": "Readout",
+      "type": "string"
+    },
+    "System": {
+      "description": "What system the evidence came from. Human > model.\n\nDeliberately generic. Disease-specific model systems (organoids, PDX,\nxenografts, humanized mice) map onto these tiers; the tier is what carries\ncausal weight, not the specific model.",
+      "enum": [
+        "human",
+        "human_primary_cell",
+        "human_derived_model",
+        "animal_model",
+        "cell_line",
+        "in_silico"
+      ],
+      "title": "System",
+      "type": "string"
+    },
+    "Tier": {
+      "description": "Ordinal, not numeric. A 73/100 implies precision we do not have.\n\nCONTRADICTED is not \"weak\" -- it is evidence pointing the other way, and it\nforces the composite down rather than being averaged away.",
+      "enum": [
+        "strong",
+        "moderate",
+        "weak",
+        "absent",
+        "contradicted"
+      ],
+      "title": "Tier",
+      "type": "string"
+    }
+  },
+  "description": "The full output. The composite tier is the headline; the posterior is\nsubordinate to it. The verdict is a (position, necessity/sufficiency, context)\ntuple, never a bare global label.",
+  "properties": {
+    "target": {
+      "title": "Target",
+      "type": "string"
+    },
+    "disease": {
+      "title": "Disease",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/Context",
+      "description": "The conditional scope. An unscoped verdict must say so."
+    },
+    "dimensions": {
+      "additionalProperties": {
+        "$ref": "#/$defs/DimensionAssessment"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/Dimension"
+      },
+      "title": "Dimensions",
+      "type": "object"
+    },
+    "composite": {
+      "$ref": "#/$defs/Composite"
+    },
+    "archetype": {
+      "$ref": "#/$defs/Archetype"
+    },
+    "inus": {
+      "$ref": "#/$defs/InusVerdict"
+    },
+    "posterior": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Posterior"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "archetype_rationale": {
+      "title": "Archetype Rationale",
+      "type": "string"
+    },
+    "next_experiment": {
+      "description": "Which dimension is weakest and most cheaply strengthened. This converts the tool from a scorer into a decision aid.",
+      "title": "Next Experiment",
+      "type": "string"
+    },
+    "not_examined": {
+      "description": "Modalities not queried. Never silently truncate.",
+      "items": {
+        "$ref": "#/$defs/Dimension"
+      },
+      "title": "Not Examined",
+      "type": "array"
+    },
+    "stopped_because": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stopped Because"
+    },
+    "conflicts": {
+      "description": "Directional disagreements, surfaced not averaged (invariant #5)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "coarse_label_warning": {
+      "default": false,
+      "description": "Disease term maps to many subtypes; stratification advised.",
+      "title": "Coarse Label Warning",
+      "type": "boolean"
+    },
+    "known_limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Known Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "target",
+    "disease",
+    "dimensions",
+    "composite",
+    "archetype",
+    "archetype_rationale",
+    "next_experiment"
+  ],
+  "title": "TargetAppraisal",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

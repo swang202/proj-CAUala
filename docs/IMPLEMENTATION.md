@@ -1,6 +1,6 @@
 # proj-CAUala — implementation guide
 
-> 🧭 **Use & build — run it + architecture.** What shipped, how to run it (CLI + web + tests), and where each piece lives. New to the project? Start at [memo.md](memo.md). Full map: **[docs/README.md](docs/README.md)**.
+> 🧭 **Use & build — run it + architecture.** What shipped, how to run it (CLI + web + tests), and where each piece lives. New to the project? Start at [memo.md](../memo.md). Full map: **[docs/README.md](README.md)**.
 
 What was built against `build-brief.md`, how to run it, and where each piece of the
 brief lives in code. The architecture is the brief's **hybrid**: a deterministic
@@ -37,7 +37,7 @@ Install the web extra with `uv pip install --python .venv -e '.[web]'`.
 `/healthz` check, CORS on the JSON API, and a concurrency cap. Ship-ready configs
 are in the repo root — `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, and a
 Hugging Face Space template — with step-by-step instructions for each host in
-[`docs/DEPLOY.md`](docs/DEPLOY.md). Note: it needs a Python-capable host (it runs
+[`docs/DEPLOY.md`](DEPLOY.md). Note: it needs a Python-capable host (it runs
 server-side), so a pure static host like GitHub Pages will not work; Hugging Face
 Spaces or Render are the easiest free options.
 
@@ -46,7 +46,7 @@ is cited to its source and tagged `[RETRIEVED]` (verify in-source) or `[UNVERIFI
 (curated placeholder). Pass `--offline` to use only curated fixtures. It also takes
 `--format json|html`, `--out FILE`, and context flags (`--ancestry`, `--tissue`,
 `--cell-type`, `--disease-subtype`, `--stage`, `--sex`). See
-[`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the data-source list and how to add more.
+[`docs/CONNECTORS.md`](CONNECTORS.md) for the data-source list and how to add more.
 
 ## Module map
 
@@ -127,7 +127,7 @@ The association-strong set `{HDL-C, CRP, tau}` and the causal-strong set
   rs34637584 via Ensembl → OT variant → its own disease evidence). Other §3 catalog
   sources (DepMap, L1000, scPerturb, OpenGWAS-MR, …) have registry entries and a
   uniform contract but are not yet implemented — see
-  [`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the recipe and auth table. The
+  [`docs/CONNECTORS.md`](CONNECTORS.md) for the recipe and auth table. The
   offline FixtureConnector remains the reproducible backbone for the demo and tests.
 - **Generated outputs are not version-controlled.** `schemas/` (`cauala
   export-schemas`) and `reports/` (`cauala appraise --out …`) are git-ignored;

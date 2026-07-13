@@ -45,10 +45,12 @@ field has already paid to learn, and CAUala recovers each:
 | **HDL cholesterol** → coronary artery disease | **strongly** | `refuted` | a marker — HDL-raising drugs failed |
 | **amyloid** → Alzheimer's | **weakly** | `likely_causal` | an early, upstream initiator |
 | **tau** → Alzheimer's | strongly | `plausible` | an excellent biomarker, uncertain target |
+| **LRRK2** → Parkinson's | moderately | `likely_causal` | a genetic driver — scored **live** from GWAS + ClinVar |
 
 HDL and tau **correlate beautifully but are not drivers**; amyloid **correlates
-weakly but is causal**. A tool that ranked by association alone would get all three
-backwards, and that disagreement is the product.
+weakly but is causal**; and LRRK2 is a bona fide genetic driver, recovered from live
+databases with no curated help. A tool that ranked by association alone would get
+these backwards, and that disagreement is the product.
 
 **How it does this, in brief.** CAUala types your question into
 `source → target | context`, looks up which kinds of evidence can actually establish
@@ -61,11 +63,13 @@ perturbation, never from cross-sectional correlation. The scoring is a determini
 Python core, so results are reproducible; an optional language-model layer only
 parses the question and writes prose, and it never computes a score.
 
-I want to be candid so no one is misled: the databases wired live today return
-direction-less signals, so for a brand-new gene the tool honestly says "unvalidated"
-until the directional connectors are added, and the strong verdicts above also draw
-on hand-curated directional evidence. The machinery runs end-to-end on real data;
-the breadth of the live data is still growing.
+One honest caveat: live coverage is still growing. Open Targets' integrated score
+and gnomAD constraint carry no direction; the directional signal comes from the Open
+Targets **genetics** and **variant** queries (GWAS credible sets, rare-variant
+burden, ClinVar) — which is exactly what earns LRRK2 its verdict. For a gene with
+little of that, the tool honestly says "unvalidated" rather than guessing, and the
+CVD/AD verdicts above also lean on hand-curated directional evidence. The machinery
+runs end-to-end on real data; more live sources are being added.
 
 ---
 
@@ -113,7 +117,7 @@ uv pip install --python .venv -e '.[web]'      # or: pip install -r requirements
 The web app is the easiest entry point for non-technical users: type a gene and a
 disease, watch it stream *what it's looking at right now* (which databases it's
 querying, what it found), then read the report in the page. Full install, all CLI
-commands, and the architecture are in **[IMPLEMENTATION.md](IMPLEMENTATION.md)**.
+commands, and the architecture are in **[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)**.
 
 ---
 
@@ -127,10 +131,10 @@ version:
 |---|---|
 | **Understand what it is and why** | [memo.md](memo.md) — the motivation (best first read) |
 | **Understand the causal reasoning** | [CONCEPTS.md](CONCEPTS.md) — the framework |
-| **Install & run it** (CLI + web) | [IMPLEMENTATION.md](IMPLEMENTATION.md) — the guide |
+| **Install & run it** (CLI + web) | [IMPLEMENTATION.md](docs/IMPLEMENTATION.md) — the guide |
 | **Host it as a website** for others | [docs/DEPLOY.md](docs/DEPLOY.md) |
 | **Connect or add a database** | [docs/CONNECTORS.md](docs/CONNECTORS.md) |
-| **Read the engineering spec** | [build-brief.md](build-brief.md) |
+| **Read the engineering spec** | [build-brief.md](docs/build-brief.md) |
 | **See the report format & rubric** | [docs/Causal_Evidence_Report_Spec.md](docs/Causal_Evidence_Report_Spec.md) |
 | **See the reasoning stress-test** | [docs/CAUala-critique.md](docs/CAUala-critique.md) |
 | **Browse everything** | [docs/README.md](docs/README.md) — the full map |

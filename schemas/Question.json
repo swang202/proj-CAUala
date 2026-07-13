@@ -1,0 +1,250 @@
+{
+  "$defs": {
+    "Context": {
+      "description": "The conditional scope. The atomic claim is `A -> B | context`, never a bare\n\"A causes B\". Every slot may be null; a null slot means \"unspecified / not\nscoped\", NOT \"any\". Generalization beyond the observed context is flagged,\nnever assumed.",
+      "properties": {
+        "cell_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell Type"
+        },
+        "tissue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tissue"
+        },
+        "background": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Background"
+        },
+        "ancestry": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ancestry"
+        },
+        "sex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sex"
+        },
+        "disease_subtype": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Disease Subtype"
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stage"
+        },
+        "dose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dose"
+        },
+        "time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time"
+        }
+      },
+      "title": "Context",
+      "type": "object"
+    },
+    "Direction": {
+      "description": "Which way the hypothesized arrow points.",
+      "enum": [
+        "source_to_target",
+        "target_to_source",
+        "bidirectional",
+        "unknown"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "EdgeType": {
+      "description": "The arrow being asked about. Each routes to a different evidence stack.",
+      "enum": [
+        "regulatory",
+        "physical",
+        "genetic_risk",
+        "causal_risk",
+        "causal_effect"
+      ],
+      "title": "EdgeType",
+      "type": "string"
+    },
+    "Node": {
+      "description": "A typed, ideally-resolved endpoint of the causal arrow.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/NodeType"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Resolved ontology id (Ensembl, MONDO, rsID, ChEBI, ...). None until harmonization runs.",
+          "title": "Id"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-facing symbol/label as entered (e.g. 'APP').",
+          "title": "Symbol"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Canonical name once resolved (e.g. 'Alzheimer disease').",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "NodeType": {
+      "description": "What kind of thing a source/target node is. The retrieval stack differs\nper (source_type, target_type, edge_type).",
+      "enum": [
+        "variant",
+        "gene",
+        "transcript",
+        "protein",
+        "pathway",
+        "cell_state",
+        "phenotype",
+        "disease",
+        "drug"
+      ],
+      "title": "NodeType",
+      "type": "string"
+    }
+  },
+  "description": "A parsed causal question, ready to route to an evidence stack.\n\nThe agent fills this from free text; harmonization resolves the node ids; the\norchestrator matches (source.type, target.type, edge_type) against the\nevidence-stack registry to decide which modalities to query.",
+  "properties": {
+    "source": {
+      "$ref": "#/$defs/Node"
+    },
+    "target": {
+      "$ref": "#/$defs/Node"
+    },
+    "edge_type": {
+      "$ref": "#/$defs/EdgeType"
+    },
+    "hypothesized_direction": {
+      "$ref": "#/$defs/Direction",
+      "default": "source_to_target"
+    },
+    "context": {
+      "$ref": "#/$defs/Context"
+    },
+    "raw_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The free-text question the agent parsed this from.",
+      "title": "Raw Text"
+    }
+  },
+  "required": [
+    "source",
+    "target",
+    "edge_type"
+  ],
+  "title": "Question",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

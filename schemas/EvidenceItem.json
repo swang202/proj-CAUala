@@ -1,0 +1,247 @@
+{
+  "$defs": {
+    "Assumption": {
+      "description": "Untestable conditions required for the evidence to license a causal claim.\nEvery causal estimate is assumption-conditional. Surfacing which assumption\nis doing the work is the point of the tool.",
+      "enum": [
+        "no_unmeasured_confounding",
+        "no_horizontal_pleiotropy",
+        "instrument_relevance",
+        "exclusion_restriction",
+        "no_mediator_outcome_confounding",
+        "no_reverse_causation",
+        "model_validity",
+        "correct_dag",
+        "positivity",
+        "sutva",
+        "measured_species_is_active_species",
+        "no_selection_bias"
+      ],
+      "title": "Assumption",
+      "type": "string"
+    },
+    "Dimension": {
+      "description": "The seven causal questions. Note these are questions, not data types.",
+      "enum": [
+        "intervention",
+        "genetic",
+        "temporal",
+        "mediation",
+        "mechanism",
+        "association",
+        "robustness"
+      ],
+      "title": "Dimension",
+      "type": "string"
+    },
+    "Direction": {
+      "description": "Sign of the causal claim. Bidirectional evidence -- increase harms AND\ndecrease protects -- is jointly far stronger than either alone.",
+      "enum": [
+        "target_up_disease_up",
+        "target_down_disease_down",
+        "target_up_disease_down",
+        "target_down_disease_up",
+        "null"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "EffectSize": {
+      "description": "Effect with uncertainty. Confidence is tracked separately from magnitude:\n'confident it is small' and 'no idea if it is large' are different states.",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "ci_low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci Low"
+        },
+        "ci_high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ci High"
+        },
+        "units": {
+          "description": "e.g. 'OR per SD', 'hazard ratio', 'log2FC'",
+          "title": "Units",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "units"
+      ],
+      "title": "EffectSize",
+      "type": "object"
+    },
+    "EvidenceType": {
+      "description": "Specific study designs. Ordering within a dimension matters for tiering.",
+      "enum": [
+        "human_rct",
+        "human_cell_perturbation",
+        "animal_perturbation",
+        "rare_penetrant_variant",
+        "protective_allele",
+        "allelic_series",
+        "mendelian_randomization",
+        "gwas_colocalization",
+        "gwas_nearest_gene",
+        "longitudinal_cohort",
+        "anchored_onset_cohort",
+        "formal_mediation",
+        "pathway_epistasis",
+        "biochemical_pathway",
+        "expression_concordance",
+        "cross_sectional",
+        "observational_cohort",
+        "replication",
+        "sensitivity_analysis"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "Readout": {
+      "description": "What was measured, ordered by distance from what the patient experiences.\n\nCLINICAL_OUTCOME is disease-agnostic by construction: it means survival,\nfunction, symptom burden, or event incidence -- whatever the disease's\nendpoint is. Do not add disease-specific readouts here; put the specific\nmeasure in EvidenceItem.notes.",
+      "enum": [
+        "clinical_outcome",
+        "surrogate_endpoint",
+        "disease_pathology",
+        "biomarker",
+        "molecular_profile",
+        "cellular_phenotype"
+      ],
+      "title": "Readout",
+      "type": "string"
+    },
+    "System": {
+      "description": "What system the evidence came from. Human > model.\n\nDeliberately generic. Disease-specific model systems (organoids, PDX,\nxenografts, humanized mice) map onto these tiers; the tier is what carries\ncausal weight, not the specific model.",
+      "enum": [
+        "human",
+        "human_primary_cell",
+        "human_derived_model",
+        "animal_model",
+        "cell_line",
+        "in_silico"
+      ],
+      "title": "System",
+      "type": "string"
+    }
+  },
+  "description": "The atomic unit. Every tier decomposes into these; every one must be\nclickable through to a source.\n\nCuration note: effect sizes and citations are hand-curated from papers\nactually read. A hallucinated PMID would undercut the entire\nassumption-forward thesis of the tool.",
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    },
+    "disease": {
+      "title": "Disease",
+      "type": "string"
+    },
+    "dimension": {
+      "$ref": "#/$defs/Dimension"
+    },
+    "evidence_type": {
+      "$ref": "#/$defs/EvidenceType"
+    },
+    "direction": {
+      "$ref": "#/$defs/Direction"
+    },
+    "effect": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EffectSize"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "system": {
+      "$ref": "#/$defs/System"
+    },
+    "readout": {
+      "$ref": "#/$defs/Readout"
+    },
+    "assumptions_required": {
+      "description": "What must hold for this to license a causal claim",
+      "items": {
+        "$ref": "#/$defs/Assumption"
+      },
+      "title": "Assumptions Required",
+      "type": "array"
+    },
+    "falsified_by": {
+      "description": "Plain-language: what result would kill this item",
+      "items": {
+        "type": "string"
+      },
+      "title": "Falsified By",
+      "type": "array"
+    },
+    "source": {
+      "description": "DOI or PMID. Required. No exceptions.",
+      "title": "Source",
+      "type": "string"
+    },
+    "provenance_group": {
+      "description": "Ten papers citing one original observation is ONE piece of evidence. Items sharing a provenance_group are de-duplicated before scoring.",
+      "title": "Provenance Group",
+      "type": "string"
+    },
+    "contradicts": {
+      "description": "ids of EvidenceItems this conflicts with",
+      "items": {
+        "type": "string"
+      },
+      "title": "Contradicts",
+      "type": "array"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "id",
+    "target",
+    "disease",
+    "dimension",
+    "evidence_type",
+    "direction",
+    "system",
+    "readout",
+    "source",
+    "provenance_group"
+  ],
+  "title": "EvidenceItem",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

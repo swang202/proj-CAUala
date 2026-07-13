@@ -12,12 +12,12 @@ you immediately what it is and who it's for.
 
 | I want to… | Go to |
 |---|---|
-| **Just get an answer** — type a gene + disease, no install | The hosted site (ask the maintainer for the URL) or run the web app: [Guide → Quick start](../IMPLEMENTATION.md) |
-| **Run it on my machine** (CLI or local web app) | [Guide (IMPLEMENTATION.md)](../IMPLEMENTATION.md) |
+| **Just get an answer** — type a gene + disease, no install | The hosted site (ask the maintainer for the URL) or run the web app: [Guide → Quick start](IMPLEMENTATION.md) |
+| **Run it on my machine** (CLI or local web app) | [Guide (IMPLEMENTATION.md)](IMPLEMENTATION.md) |
 | **Understand what it claims & the science** | [memo.md](../memo.md) → [CONCEPTS.md](../CONCEPTS.md) |
 | **Host it as a website for others** | [DEPLOY.md](DEPLOY.md) |
 | **Connect or add a database** | [CONNECTORS.md](CONNECTORS.md) |
-| **Read the engineering spec / extend it** | [build-brief.md](../build-brief.md) + [Guide](../IMPLEMENTATION.md) |
+| **Read the engineering spec / extend it** | [build-brief.md](build-brief.md) + [Guide](IMPLEMENTATION.md) |
 
 ---
 
@@ -27,7 +27,7 @@ you immediately what it is and who it's for.
 | Document | Role |
 |---|---|
 | [README.md](../README.md) | **Front door** — what CAUala is, in one page. |
-| [IMPLEMENTATION.md](../IMPLEMENTATION.md) | **The guide** — install, run (CLI + web), and the module-by-module map of what was built. |
+| [IMPLEMENTATION.md](IMPLEMENTATION.md) | **The guide** — install, run (CLI + web), and the module-by-module map of what was built. |
 | [DEPLOY.md](DEPLOY.md) | **Host it** — put CAUala on a public URL (Hugging Face Spaces, Render, Docker, …). |
 
 ### 🧠 Understand (the science & design)
@@ -40,7 +40,7 @@ you immediately what it is and who it's for.
 ### 🔧 Build & extend
 | Document | Role |
 |---|---|
-| [build-brief.md](../build-brief.md) | **The engineering spec** the tool was built to (architecture, schema, invariants). |
+| [build-brief.md](build-brief.md) | **The engineering spec** the tool was built to (architecture, schema, invariants). |
 | [CONNECTORS.md](CONNECTORS.md) | **Data sources** — connect live databases and add new connectors (~40 lines each). |
 
 ### 📚 Reference
@@ -62,7 +62,7 @@ you immediately what it is and who it's for.
 | `reports/`, `schemas/` | **Generated** (git-ignored) — regenerate with `cauala appraise --out` / `cauala export-schemas`. |
 | `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, `deploy/` | Hosting configs — see [DEPLOY.md](DEPLOY.md). |
 
-The full module-by-module map lives in the [guide](../IMPLEMENTATION.md).
+The full module-by-module map lives in the [guide](IMPLEMENTATION.md).
 
 ---
 
@@ -71,6 +71,6 @@ The full module-by-module map lives in the [guide](../IMPLEMENTATION.md).
 1. [memo.md](../memo.md) — *why* this exists (~5 min).
 2. [README.md](../README.md) — *what* it does.
 3. [CONCEPTS.md](../CONCEPTS.md) — *how* the causal reasoning is shaped.
-4. [IMPLEMENTATION.md](../IMPLEMENTATION.md) — run it, and see how the pieces fit.
+4. [IMPLEMENTATION.md](IMPLEMENTATION.md) — run it, and see how the pieces fit.
 
-Going deeper (developers): [CAUala-critique.md](CAUala-critique.md) → [build-brief.md](../build-brief.md) → [CONNECTORS.md](CONNECTORS.md) → the reference specs.
+Going deeper (developers): [CAUala-critique.md](CAUala-critique.md) → [build-brief.md](build-brief.md) → [CONNECTORS.md](CONNECTORS.md) → the reference specs.

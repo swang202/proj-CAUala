@@ -1,6 +1,6 @@
 # Connecting CAUala to real databases
 
-> 🧭 **Build — connect/add databases.** How live data sources work and how to add a new connector (~40 lines). Related: [../build-brief.md](../build-brief.md) (spec), [Causal_Data_Source_Catalog.md](Causal_Data_Source_Catalog.md) (the source catalog). Docs map: **[docs index](README.md)**.
+> 🧭 **Build — connect/add databases.** How live data sources work and how to add a new connector (~40 lines). Related: [build-brief.md](build-brief.md) (spec), [Causal_Data_Source_Catalog.md](Causal_Data_Source_Catalog.md) (the source catalog). Docs map: **[docs index](README.md)**.
 
 CAUala runs **online by default**: `appraise` queries live databases and every
 figure is cited to its source and tagged for validation. Two real, keyless sources

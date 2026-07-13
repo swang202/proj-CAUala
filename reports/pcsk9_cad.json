@@ -1,0 +1,246 @@
+{
+  "target": "PCSK9",
+  "disease": "coronary artery disease",
+  "context": {
+    "cell_type": null,
+    "tissue": null,
+    "background": null,
+    "ancestry": null,
+    "sex": null,
+    "disease_subtype": null,
+    "stage": null,
+    "dose": null,
+    "time": null
+  },
+  "dimensions": {
+    "genetic": {
+      "dimension": "genetic",
+      "tier": "strong",
+      "items": [
+        {
+          "id": "pcsk9_lof",
+          "target": "PCSK9",
+          "disease": "coronary artery disease",
+          "dimension": "genetic",
+          "evidence_type": "protective_allele",
+          "direction": "target_down_disease_down",
+          "effect": {
+            "value": 0.12,
+            "ci_low": 0.03,
+            "ci_high": 0.45,
+            "units": "OR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [
+            "no_horizontal_pleiotropy"
+          ],
+          "falsified_by": [
+            "LOF carriers show no reduction in CHD incidence"
+          ],
+          "source": "PMID:16554528",
+          "provenance_group": "pcsk9_lof_aric",
+          "contradicts": [],
+          "notes": null
+        },
+        {
+          "id": "pcsk9_gof",
+          "target": "PCSK9",
+          "disease": "coronary artery disease",
+          "dimension": "genetic",
+          "evidence_type": "rare_penetrant_variant",
+          "direction": "target_up_disease_up",
+          "effect": {
+            "value": 2.8,
+            "ci_low": 1.9,
+            "ci_high": 4.1,
+            "units": "OR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "GOF carriers show normal LDL and normal CHD risk"
+          ],
+          "source": "10.1038/ng1161",
+          "provenance_group": "pcsk9_gof_fh",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_horizontal_pleiotropy"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "LOF carriers show no reduction in CHD incidence"
+    },
+    "intervention": {
+      "dimension": "intervention",
+      "tier": "strong",
+      "items": [
+        {
+          "id": "pcsk9_fourier",
+          "target": "PCSK9",
+          "disease": "coronary artery disease",
+          "dimension": "intervention",
+          "evidence_type": "human_rct",
+          "direction": "target_down_disease_down",
+          "effect": {
+            "value": 0.85,
+            "ci_low": 0.79,
+            "ci_high": 0.92,
+            "units": "HR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "No reduction in MACE despite LDL lowering"
+          ],
+          "source": "PMID:28304224",
+          "provenance_group": "pcsk9_fourier",
+          "contradicts": [],
+          "notes": null
+        },
+        {
+          "id": "pcsk9_odyssey",
+          "target": "PCSK9",
+          "disease": "coronary artery disease",
+          "dimension": "intervention",
+          "evidence_type": "human_rct",
+          "direction": "target_down_disease_down",
+          "effect": {
+            "value": 0.85,
+            "ci_low": 0.78,
+            "ci_high": 0.93,
+            "units": "HR"
+          },
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "A second PCSK9-inhibitor trial shows no MACE benefit"
+          ],
+          "source": "PMID:30403574",
+          "provenance_group": "pcsk9_odyssey",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "No reduction in MACE despite LDL lowering"
+    },
+    "mechanism": {
+      "dimension": "mechanism",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "pcsk9_mech",
+          "target": "PCSK9",
+          "disease": "coronary artery disease",
+          "dimension": "mechanism",
+          "evidence_type": "biochemical_pathway",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "PCSK9 shown not to regulate hepatic LDL-receptor turnover"
+          ],
+          "source": "10.1074/jbc.M311730200",
+          "provenance_group": "pcsk9_ldlr_mech",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "PCSK9 shown not to regulate hepatic LDL-receptor turnover"
+    }
+  },
+  "composite": "causal_driver",
+  "archetype": "validated_driver",
+  "inus": {
+    "necessity": "supported",
+    "sufficiency": "supported"
+  },
+  "posterior": {
+    "value": 0.8824312614927585,
+    "prior": 0.05,
+    "prior_source": "base rate for a randomly chosen gene-disease pair (curated set)",
+    "calibrated": false,
+    "reliability_bin": null
+  },
+  "archetype_rationale": "Converging bidirectional causal evidence -- loss- and gain-of-function pointing opposite ways -- together with a successful human intervention place the target on the causal path with the strongest support the framework assigns. For illustration, PCSK9 in coronary disease -- loss-of-function alleles protect, gain-of-function causes familial hypercholesterolemia, and PCSK9 inhibitors cut events in outcome trials.",
+  "next_experiment": "None needed for causal status; bidirectional genetics and two positive outcome trials already converge. Remaining question is dose/timing optimization.",
+  "not_examined": [
+    "association"
+  ],
+  "stopped_because": "Verdict is at an extreme (causal_driver); no remaining modality's maximum plausible weight could flip it.",
+  "conflicts": [],
+  "coarse_label_warning": false,
+  "known_limitations": [
+    "Effect depends on when you intervene; a static tier has no time axis.",
+    "Driver and mediator are both causal; position is a relation, not a coordinate.",
+    "Total and direct effects diverge; conditioning on a mediator can induce collider bias.",
+    "Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit."
+  ],
+  "csp_profile": {
+    "A1": 3,
+    "A2": 3,
+    "A3": 2,
+    "A4": 2,
+    "B1": 0,
+    "B2": 0,
+    "B3": 0,
+    "B4": 3
+  },
+  "verdict_line": "validated_driver [necessary_and_sufficient] | scope: unscoped (no context specified -- verdict is not context-conditional) | tier: causal_driver | likely causal, uncalibrated (prior 0.05 from base rate for a randomly chosen gene-disease pair (curated set))",
+  "provenance": {
+    "validation_banner": "5 figure(s) from curated fixtures carry placeholder citations (TODO:cite) \u2014 tagged [UNVERIFIED]; replace from the primary paper before use.",
+    "sources": [
+      {
+        "source": "PMID:16554528",
+        "provenance_group": "pcsk9_lof_aric",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "PMID:16554528 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1038/ng1161",
+        "provenance_group": "pcsk9_gof_fh",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1038/ng1161 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "PMID:28304224",
+        "provenance_group": "pcsk9_fourier",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "PMID:28304224 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "PMID:30403574",
+        "provenance_group": "pcsk9_odyssey",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "PMID:30403574 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1074/jbc.M311730200",
+        "provenance_group": "pcsk9_ldlr_mech",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1074/jbc.M311730200 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      }
+    ]
+  }
+}

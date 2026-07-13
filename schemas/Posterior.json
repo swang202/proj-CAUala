@@ -1,0 +1,49 @@
+{
+  "description": "The subordinate confidence estimate. Governed by three hard rules from DESIGN:\n  1. it may NEVER exceed the gated tier (a posterior cannot overrule identification);\n  2. until calibrated, it renders as a band/bin, never a bare float;\n  3. it shows digits only when calibrated, and then WITH reliability provenance.\n\n`render()` enforces rule 2/3. Do not read `.value` for display -- use render().",
+  "properties": {
+    "value": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Value",
+      "type": "number"
+    },
+    "prior": {
+      "description": "Base rate used; report it explicitly",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Prior",
+      "type": "number"
+    },
+    "prior_source": {
+      "description": "Where the prior came from (curated set? constraint? network distance?)",
+      "title": "Prior Source",
+      "type": "string"
+    },
+    "calibrated": {
+      "default": false,
+      "title": "Calibrated",
+      "type": "boolean"
+    },
+    "reliability_bin": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "e.g. '0.9 bin, observed hit-rate 0.88 on ClinGen gold set'",
+      "title": "Reliability Bin"
+    }
+  },
+  "required": [
+    "value",
+    "prior",
+    "prior_source"
+  ],
+  "title": "Posterior",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

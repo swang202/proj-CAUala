@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAUala — LRRK2 → Parkinson disease</title>
+<style>
+:root{
+ --page:#f9f9f7; --surface:#ffffff; --surface-2:#fcfcfb;
+ --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+ --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+ /* vivid: fills, marks, borders, bar fills */
+ --blue:#2a78d6; --aqua:#1baf7a; --good:#0ca30c; --warning:#eda100;
+ --serious:#ec835a; --critical:#d03b3b; --data-fill:rgba(42,120,214,.16);
+ /* text-safe: darker so colored WORDS stay readable on the light surface */
+ --tt-good:#0a7d2f; --tt-blue:#1f5fab; --tt-warning:#7a5300;
+ --tt-serious:#a8492a; --tt-critical:#b02a2a; --tt-muted:#52514e;
+}
+@media (prefers-color-scheme:dark){:root{
+ --page:#0d0d0d; --surface:#1a1a19; --surface-2:#201f1e;
+ --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+ --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+ --blue:#3987e5; --aqua:#199e70; --good:#0ca30c; --warning:#c98500;
+ --serious:#ec835a; --critical:#e05a5a; --data-fill:rgba(57,135,229,.22);
+ --tt-good:#34d17a; --tt-blue:#6aa8f0; --tt-warning:#e6b24d;
+ --tt-serious:#f0a07a; --tt-critical:#ef6b6b; --tt-muted:#c3c2b7;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+ font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;}
+.wrap{max-width:940px;margin:0 auto;padding:24px 18px 64px;}
+h1{font-size:20px;margin:0 0 2px} h2{font-size:16px;margin:34px 0 12px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0;}
+.muted{color:var(--muted)} b{font-weight:650}
+/* hero */
+.hero{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;}
+.badge{display:inline-flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:12px;
+ border:1px solid var(--border);min-width:180px;background:var(--surface-2);}
+.badge .lab{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.badge .val{font-size:22px;font-weight:750;line-height:1.15}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;flex:1;min-width:260px}
+.tile{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.tile .lab{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-size:14px;font-weight:600;margin-top:2px}
+.rationale{margin-top:14px;padding-left:12px;border-left:3px solid var(--blue);color:var(--ink-2);font-size:14px}
+.meaning{margin-top:10px;font-size:13.5px;color:var(--ink-2)}
+.validate{background:color-mix(in srgb,var(--warning) 14%,var(--surface));
+ border:1px solid color-mix(in srgb,var(--warning) 45%,var(--border));
+ border-radius:10px;padding:10px 14px;margin:14px 0;font-size:13px}
+/* verdict scale */
+.scale{display:flex;gap:4px;margin-top:6px}
+.scale .seg{flex:1;text-align:center;font-size:11px;padding:8px 4px;border-radius:8px;
+ background:var(--surface-2);border:1px solid var(--border);color:var(--muted)}
+.scale .seg.active{color:var(--ct);background:color-mix(in srgb,var(--c) 20%,var(--surface));border-color:var(--c);font-weight:700}
+/* dimension bars */
+.dim{margin:12px 0}
+.dim-head{display:flex;align-items:baseline;gap:10px;font-size:13.5px}
+.dim-name{font-weight:650;text-transform:capitalize;min-width:96px}
+.dim-tier{font-weight:700;text-transform:capitalize;font-size:12.5px}
+.dim-count{color:var(--muted);font-size:12px;margin-left:auto}
+.dim-track{height:9px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;margin:5px 0 3px;overflow:hidden}
+.dim-fill{height:100%;border-radius:6px 4px 4px 6px}
+.dim-explain{font-size:12px;color:var(--muted)}
+/* radar */
+.radar-wrap{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.radar{width:100%;max-width:360px;height:auto}
+.radar .ring{fill:none;stroke:var(--grid);stroke-width:1}
+.radar .ring0{opacity:.6}
+.radar .spoke{stroke:var(--grid);stroke-width:1}
+.radar .gate{fill:none;stroke:var(--critical);stroke-width:1.6;stroke-dasharray:4 3;opacity:.75}
+.radar .axlab{font:650 12px system-ui}
+.radar .axlab.a{fill:var(--blue)} .radar .axlab.b{fill:var(--aqua)}
+.radar .ringlab{font:11px system-ui;fill:var(--muted)}
+.radar .data{fill:var(--data-fill);stroke:var(--blue);stroke-width:2}
+.radar .dot{fill:var(--blue)}
+.radar-key{flex:1;min-width:230px;font-size:13px}
+.radar-key .fam{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.axis-list{margin:8px 0 0;padding:0;list-style:none;font-size:12.5px}
+.axis-list li{display:flex;justify-content:space-between;gap:12px;padding:3px 0;border-bottom:1px dashed var(--border)}
+.axis-list .sc{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+/* pipeline */
+.pipeline{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px}
+.pstep{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:8px 11px;flex:1;min-width:120px}
+.pstep-t{font-size:12.5px;font-weight:650} .pstep-d{font-size:11px;color:var(--muted);margin-top:2px}
+.arrow{align-self:center;color:var(--muted);font-size:15px}
+/* sources */
+.src-card{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:12px 0;background:var(--surface-2)}
+.src-head{display:flex;align-items:center;gap:8px;font-size:14px}
+.src-sub{font-size:12px;color:var(--ink-2);margin:4px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.table-wrap{overflow-x:auto}
+/* evidence cards */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.ev{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px}
+.ev-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ev-effect{font-weight:600;margin:6px 0}
+.ev-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.chip{font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--ink-2)}
+.ev-cite{font-size:11.5px;color:var(--muted)}
+.ev-note{font-size:11.5px;color:var(--ink-2);margin-top:6px;font-style:italic}
+.tag{font-size:10px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:5px}
+.tag-live{background:color-mix(in srgb,var(--blue) 18%,var(--surface));color:var(--blue)}
+.tag-unver{background:color-mix(in srgb,var(--warning) 20%,var(--surface));color:var(--warning)}
+.refs{font-size:12.5px;padding-left:18px} .refs li{margin:5px 0} code{font-size:12px}
+.explainer{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px}
+.explainer div b{color:var(--ink)}
+.next{background:color-mix(in srgb,var(--good) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--good) 35%,var(--border));border-radius:10px;padding:12px 14px;font-size:13.5px}
+.warn-list{font-size:13px;color:var(--ink-2)}
+</style></head>
+<body><div class="wrap">
+
+<h1>LRRK2 → Parkinson disease</h1>
+<p class="sub">Causal evidence appraisal · scope: unscoped (no context specified -- verdict is not context-conditional)</p>
+
+<div class="card">
+  <div class="hero">
+    <div class="badge" style="border-color:var(--good)">
+      <span class="lab">Verdict tier</span>
+      <span class="val" style="color:var(--tt-good)">Likely causal</span>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="lab">Structural position</div><div class="v">upstream initiator</div></div>
+      <div class="tile"><div class="lab">Necessity × sufficiency</div><div class="v">undetermined</div></div>
+      <div class="tile"><div class="lab">Confidence</div><div class="v">likely causal, uncalibrated (prior 0.05 from default null base rate for gene-disease pairs)</div></div>
+    </div>
+  </div>
+  <div class="meaning"><b>What this means:</b> Strong causal evidence on at least one axis, though short of the full bidirectional-plus-intervention convergence. Probably causal.</div>
+  <div class="rationale">Strong genetic causal support pairs with weak concurrent correlation, the signature of a node that acts early in the cascade and whose association to the measured outcome decays as causal distance grows. For illustration, amyloid in Alzheimer&#x27;s disease, an early node whose correlation with late disease severity has decayed with causal distance.</div>
+</div>
+
+<p class="validate">⚠️ <b>Validation required.</b> 8 figure(s) RETRIEVED live this session from Open Targets (genetics: GWAS / burden / ClinVar), Open Targets Platform, gnomAD — tagged [RETRIEVED]; verify each in-source before use.</p>
+
+<h2>Where this verdict sits</h2>
+<div class="card">
+  <div class="scale" aria-label="verdict tier scale, best to worst"><div class="seg " style="--c:var(--good);--ct:var(--tt-good)"><span>Causal driver</span></div><div class="seg active" style="--c:var(--good);--ct:var(--tt-good)"><span>Likely causal</span></div><div class="seg " style="--c:var(--warning);--ct:var(--tt-warning)"><span>Plausible</span></div><div class="seg " style="--c:var(--muted);--ct:var(--tt-muted)"><span>Unvalidated</span></div><div class="seg " style="--c:var(--serious);--ct:var(--tt-serious)"><span>Likely non-causal</span></div><div class="seg " style="--c:var(--critical);--ct:var(--tt-critical)"><span>Refuted</span></div></div>
+  <p class="meaning" style="margin-top:12px"><b>Position (upstream initiator):</b> An early, upstream cause. Its weak concurrent correlation is the signature of an initiator — not evidence against it.</p>
+  <p class="meaning"><b>Necessity × sufficiency:</b> Necessity/sufficiency not established; loss- and gain-of-function needed.</p>
+</div>
+
+<h2>How to read this report</h2>
+<div class="card explainer">
+  <div><b>Tier</b> is the headline — the honest ceiling set by the strongest causal evidence present. Association and mechanism alone cap at “Unvalidated.”</div>
+  <div><b>Position</b> says where the target sits in the causal graph — a driver, a marker, an upstream initiator, and so on. A score can’t say this; the label can.</div>
+  <div><b>Necessity × sufficiency</b> asks two different questions: is the target required, and is it enough? They need different experiments.</div>
+  <div><b>Confidence</b> is deliberately subordinate to the tier and shown as a band, not a bare number, until the tool is calibrated on a gold-standard set.</div>
+  <div><b>The core idea:</b> correlation with a disease and causal position are different axes. A marker can correlate beautifully and still not be a cause. CAUala <b>gates</b> — it never lets a mechanism story sum its way to a high score.</div>
+</div>
+
+<h2>Evidence strength by dimension</h2>
+<div class="card">
+  <p class="sub" style="margin:0 0 6px">Each dimension is a different causal question, scored on its own merits. Only the causal dimensions can raise the tier.</p>
+  <div class="dim"><div class="dim-head"><span class="dim-name">intervention</span><span class="dim-tier" style="color:var(--tt-muted)">absent</span></div><div class="dim-track"><div class="dim-fill" style="width:6%;background:var(--muted)"></div></div><div class="dim-explain">Did anyone actually perturb the target and watch the outcome? The strongest kind of evidence.</div></div><div class="dim"><div class="dim-head"><span class="dim-name">genetic</span><span class="dim-tier" style="color:var(--tt-good)">strong</span><span class="dim-count">6 records</span></div><div class="dim-track"><div class="dim-fill" style="width:100%;background:var(--good)"></div></div><div class="dim-explain">Does nature&#x27;s randomization — genetics — support it? The arrow points away from fixed genotype.</div></div><div class="dim"><div class="dim-head"><span class="dim-name">temporal</span><span class="dim-tier" style="color:var(--tt-muted)">absent</span></div><div class="dim-track"><div class="dim-fill" style="width:6%;background:var(--muted)"></div></div><div class="dim-explain">Does the target change before the disease, not after?</div></div><div class="dim"><div class="dim-head"><span class="dim-name">mediation</span><span class="dim-tier" style="color:var(--tt-muted)">absent</span></div><div class="dim-track"><div class="dim-fill" style="width:6%;background:var(--muted)"></div></div><div class="dim-explain">Is it a driver, a mediator on the path, or downstream?</div></div><div class="dim"><div class="dim-head"><span class="dim-name">mechanism</span><span class="dim-tier" style="color:var(--tt-blue)">moderate</span><span class="dim-count">1 record</span></div><div class="dim-track"><div class="dim-fill" style="width:66%;background:var(--blue)"></div></div><div class="dim-explain">Is there a pathway story? Plausibility only — it can never raise the score by itself.</div></div><div class="dim"><div class="dim-head"><span class="dim-name">association</span><span class="dim-tier" style="color:var(--tt-blue)">moderate</span><span class="dim-count">1 record</span></div><div class="dim-track"><div class="dim-fill" style="width:66%;background:var(--blue)"></div></div><div class="dim-explain">The honest baseline: how strongly does it correlate? Shown separately; it never drives the verdict.</div></div><div class="dim"><div class="dim-head"><span class="dim-name">robustness</span><span class="dim-tier" style="color:var(--tt-muted)">absent</span></div><div class="dim-track"><div class="dim-fill" style="width:6%;background:var(--muted)"></div></div><div class="dim-explain">How fragile are the assumptions, and does contradictory evidence exist?</div></div>
+</div>
+
+<h2>Causal Strength Profile</h2>
+<div class="card">
+  <div class="radar-wrap">
+    <svg viewBox="0 0 360 360" class="radar" role="img" aria-label="Causal Strength Profile radar, 8 axes scored 0 to 3"><polygon points="180.0,164.1 191.3,168.7 195.9,180.0 191.3,191.3 180.0,195.9 168.7,191.3 164.1,180.0 168.7,168.7" class="ring ring0"/><polygon points="180.0,128.6 216.4,143.6 231.4,180.0 216.4,216.4 180.0,231.4 143.6,216.4 128.6,180.0 143.6,143.6" class="ring"/><polygon points="180.0,93.1 241.5,118.5 266.9,180.0 241.5,241.5 180.0,266.9 118.5,241.5 93.1,180.0 118.5,118.5" class="ring"/><polygon points="180.0,57.6 266.5,93.5 302.4,180.0 266.5,266.5 180.0,302.4 93.5,266.5 57.6,180.0 93.5,93.5" class="ring"/><polygon points="180.0,128.6 216.4,143.6 231.4,180.0 216.4,216.4 180.0,231.4 143.6,216.4 128.6,180.0 143.6,143.6" class="gate"/><line x1="180.0" y1="180.0" x2="180.0" y2="57.6" class="spoke"/><line x1="180.0" y1="180.0" x2="266.5" y2="93.5" class="spoke"/><line x1="180.0" y1="180.0" x2="302.4" y2="180.0" class="spoke"/><line x1="180.0" y1="180.0" x2="266.5" y2="266.5" class="spoke"/><line x1="180.0" y1="180.0" x2="180.0" y2="302.4" class="spoke"/><line x1="180.0" y1="180.0" x2="93.5" y2="266.5" class="spoke"/><line x1="180.0" y1="180.0" x2="57.6" y2="180.0" class="spoke"/><line x1="180.0" y1="180.0" x2="93.5" y2="93.5" class="spoke"/><text x="184.0" y="164.1" class="ringlab">0</text><text x="184.0" y="128.6" class="ringlab">1</text><text x="184.0" y="93.1" class="ringlab">2</text><text x="184.0" y="57.6" class="ringlab">3</text><text x="180.0" y="35.6" class="axlab a" text-anchor="middle" dominant-baseline="middle">A1</text><text x="282.1" y="77.9" class="axlab a" text-anchor="middle" dominant-baseline="middle">A2</text><text x="324.4" y="180.0" class="axlab a" text-anchor="middle" dominant-baseline="middle">A3</text><text x="282.1" y="282.1" class="axlab a" text-anchor="middle" dominant-baseline="middle">A4</text><text x="180.0" y="324.4" class="axlab b" text-anchor="middle" dominant-baseline="middle">B1</text><text x="77.9" y="282.1" class="axlab b" text-anchor="middle" dominant-baseline="middle">B2</text><text x="35.6" y="180.0" class="axlab b" text-anchor="middle" dominant-baseline="middle">B3</text><text x="77.9" y="77.9" class="axlab b" text-anchor="middle" dominant-baseline="middle">B4</text><polygon points="180.0,57.6 266.5,93.5 231.4,180.0 216.4,216.4 180.0,195.9 168.7,191.3 164.1,180.0 93.5,93.5" class="data"/><circle cx="180.0" cy="57.6" r="3.2" class="dot"/><circle cx="266.5" cy="93.5" r="3.2" class="dot"/><circle cx="231.4" cy="180.0" r="3.2" class="dot"/><circle cx="216.4" cy="216.4" r="3.2" class="dot"/><circle cx="180.0" cy="195.9" r="3.2" class="dot"/><circle cx="168.7" cy="191.3" r="3.2" class="dot"/><circle cx="164.1" cy="180.0" r="3.2" class="dot"/><circle cx="93.5" cy="93.5" r="3.2" class="dot"/></svg>
+    <div class="radar-key">
+      <div><span class="fam" style="background:var(--blue)"></span><b>A1–A4 · Identification</b> — did we rule out the rival explanations? These set the ceiling.</div>
+      <div style="margin-top:4px"><span class="fam" style="background:var(--aqua)"></span><b>B1–B4 · Corroboration</b> — how strong is the positive signal?</div>
+      <ul class="axis-list"><li><span>A1 · Confounding Robustness <span class="muted">(identification)</span></span><span class="sc">3/3</span></li><li><span>A2 · Reverse-Causation Robustness <span class="muted">(identification)</span></span><span class="sc">3/3</span></li><li><span>A3 · Selection Robustness <span class="muted">(identification)</span></span><span class="sc">1/3</span></li><li><span>A4 · Interventional Directness <span class="muted">(identification)</span></span><span class="sc">1/3</span></li><li><span>B1 · Dose-Response Gradient <span class="muted">(corroboration)</span></span><span class="sc">0/3</span></li><li><span>B2 · Temporal Precedence <span class="muted">(corroboration)</span></span><span class="sc">0/3</span></li><li><span>B3 · Replication Breadth <span class="muted">(corroboration)</span></span><span class="sc">0/3</span></li><li><span>B4 · Human Translatability <span class="muted">(corroboration)</span></span><span class="sc">3/3</span></li></ul>
+    </div>
+  </div>
+  <p class="meaning" style="margin-top:12px"><b>The identification gate.</b> The dashed ring marks the weakest identification axis (A1–A4 min = 1 of 3), here <b>Selection Robustness, Interventional Directness</b>. Identification is the ceiling on any causal claim: however large the corroboration shape grows on the B side, it cannot make up for a gap on the A side. That is why the <i>shape</i> of this profile matters more than its area — two targets with the same area can be identified very differently.</p>
+</div>
+
+<h2>Data sources &amp; how they were analyzed</h2>
+<div class="card">
+  <p class="sub" style="margin:0 0 8px">Exactly what each database returned, and the tier the deterministic scorer assigned to it. Direction-less scores (an integrated association, a constraint metric) can add strength but never set a causal tier by themselves.</p>
+  <div class="src-card"><div class="src-head"><b>Open Targets Platform</b><span class="tag tag-live">RETRIEVED</span></div><div class="src-sub">A (open, keyless) · live GraphQL query this session · cite: Ochoa et al., Nucleic Acids Research 51:D1353 (2023)<br><span class="muted">RETRIEVED live — integrated score, not a primary measurement; verify the underlying datatype evidence in-source before use.</span></div><div class="table-wrap"><table class="src-table"><thead><tr><th>what was retrieved</th><th>dimension</th><th>direction</th><th>effect</th><th>scorer’s tier</th></tr></thead><tbody><tr><td>observational cohort</td><td>association</td><td>no directional effect (null result)</td><td>0.741 OT association score (0-1) (no CI)</td><td><b style="color:var(--tt-blue)">moderate</b></td></tr></tbody></table></div></div><div class="src-card"><div class="src-head"><b>Open Targets (genetics: GWAS / burden / ClinVar)</b><span class="tag tag-unver">RETRIEVED</span></div><div class="src-sub">A (open, keyless) · live GraphQL query this session · cite: Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item<br><span class="muted">RETRIEVED live — directional genetic evidence; the item&#x27;s primary study PMID should be read in-source, and gene-level direction confirmed with eQTL where inferred.</span></div><div class="table-wrap"><table class="src-table"><thead><tr><th>what was retrieved</th><th>dimension</th><th>direction</th><th>effect</th><th>scorer’s tier</th></tr></thead><tbody><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr><tr><td>rare penetrant variant</td><td>genetic</td><td>↑ target ⇒ ↑ disease (harmful)</td><td>no effect size on record</td><td><b style="color:var(--tt-good)">strong</b></td></tr></tbody></table></div></div><div class="src-card"><div class="src-head"><b>gnomAD</b><span class="tag tag-live">RETRIEVED</span></div><div class="src-sub">A (open, keyless) · live GraphQL query this session · cite: Karczewski et al., Nature 581:434 (2020)<br><span class="muted">RETRIEVED live — constraint metric; confirm gene build/version and current gnomAD release before use.</span></div><div class="table-wrap"><table class="src-table"><thead><tr><th>what was retrieved</th><th>dimension</th><th>direction</th><th>effect</th><th>scorer’s tier</th></tr></thead><tbody><tr><td>biochemical pathway</td><td>mechanism</td><td>no directional effect (null result)</td><td>0.754 LOEUF (no CI)</td><td><b style="color:var(--tt-blue)">moderate</b></td></tr></tbody></table></div></div>
+</div>
+
+<h2>How the analysis works</h2>
+<div class="card">
+  <div class="pipeline"><div class="pstep"><div class="pstep-t">Question typed</div><div class="pstep-d">LRRK2 → Parkinson disease</div></div><div class="arrow">→</div><div class="pstep"><div class="pstep-t">Evidence stack chosen</div><div class="pstep-d">modalities that can establish this arrow</div></div><div class="arrow">→</div><div class="pstep"><div class="pstep-t">Databases queried</div><div class="pstep-d">3 source(s), 8 record(s)</div></div><div class="arrow">→</div><div class="pstep"><div class="pstep-t">Tiered by dimension</div><div class="pstep-d">each design scored on its own merits</div></div><div class="arrow">→</div><div class="pstep"><div class="pstep-t">Identification gate</div><div class="pstep-d">the ceiling = weakest identification axis</div></div><div class="arrow">→</div><div class="pstep"><div class="pstep-t">Verdict</div><div class="pstep-d">Likely causal</div></div></div>
+  <h3 style="font-size:13.5px;margin:18px 0 6px">The estimand — the exact question, as an intervention</h3>
+  <div class="table-wrap"><table><tbody><tr><td><b>X (intervened on)</b></td><td>LRRK2</td></tr><tr><td><b>a vs b (contrast)</b></td><td>perturbed vs reference level of the target</td></tr><tr><td><b>M (readout)</b></td><td>disease-relevant clinical outcome / endpoint</td></tr><tr><td><b>system (held fixed)</b></td><td>unscoped (no context specified -- verdict is not context-conditional)</td></tr><tr><td><b>population</b></td><td>unspecified (flagged: generalization not assumed)</td></tr></tbody></table></div>
+  <h3 style="font-size:13.5px;margin:18px 0 6px">Ruling out the four rival explanations</h3>
+  <div class="table-wrap"><table><thead><tr><th>Rival explanation</th><th>Design that rules it out</th><th>Status here</th></tr></thead><tbody><tr><td>X → Y (causal)</td><td>MR + coloc; isogenic knock-in / rescue</td><td>supported</td></tr><tr><td>Y → X (reverse causation)</td><td>instrument fixed at conception; longitudinal</td><td>addressed (genotype fixed at conception)</td></tr><tr><td>Z → X, Z → Y (confounding)</td><td>randomized / MR; conditional KO</td><td>addressed by genetic randomization</td></tr><tr><td>X → S ← Y (collider / selection)</td><td>population sampling; IPW</td><td>acknowledged, not fully modeled</td></tr></tbody></table></div>
+</div>
+
+<h2>Evidence in favour</h2>
+<div class="card"><div class="ev-grid"><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs34637584; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs33939927; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs34995376; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs34805604; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs35801418; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>rare penetrant variant</b><span class="muted">genetic · ↑ target ⇒ ↑ disease (harmful)</span></div><div class="ev-effect">no effect size on record</div><div class="ev-meta"><span class="chip">scored: strong</span><span class="chip">human / clinical outcome</span></div><div class="ev-cite">Open Targets (genetics: GWAS / burden / ClinVar) · Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item</div><div class="ev-note">Open Targets genetic evidence via ClinVar curated variant; variant rs35870237; missense_variant; directionOnTrait=risk; gene-level direction inferred from the disease-risk sign (eQTL colocalization would confirm)</div></div></div></div>
+
+<h2>Evidence against &amp; informative nulls</h2>
+<div class="card"><div class="ev-grid"><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>observational cohort</b><span class="muted">association · no directional effect (null result)</span></div><div class="ev-effect">0.741 OT association score (0-1) (no CI)</div><div class="ev-meta"><span class="chip">scored: moderate</span><span class="chip">human / molecular profile</span></div><div class="ev-cite">Open Targets Platform · Ochoa et al., Nucleic Acids Research 51:D1353 (2023)</div><div class="ev-note">Integrated backbone score only. Direction-less by construction; contributes to strength/consistency, never a causal tier. datatype scores: {&#x27;literature&#x27;: 0.999, &#x27;affected_pathway&#x27;: 0.555, &#x27;genetic_association&#x27;: 0.796, &#x27;genetic_literature&#x27;: 0.73}</div></div><div class="ev"><div class="ev-top"><span class="tag tag-live">RETRIEVED</span><b>biochemical pathway</b><span class="muted">mechanism · no directional effect (null result)</span></div><div class="ev-effect">0.754 LOEUF (no CI)</div><div class="ev-meta"><span class="chip">scored: moderate</span><span class="chip">human / molecular profile</span></div><div class="ev-cite">gnomAD · Karczewski et al., Nature 581:434 (2020)</div><div class="ev-note">gnomAD GRCh38 constraint: LOEUF=0.7537248912492516, pLI=1.316870232403417e-43. LOF-tolerant (unconstrained; haploinsufficiency less likely). Plausibility only -- cannot raise the causal tier (invariant #2).</div></div></div></div>
+
+<h2>What would change the verdict</h2>
+<div class="card">
+  <div class="next"><b>Next experiment</b> (the weakest dimension, most cheaply strengthened): Strengthen the weakest causal dimension with a genotype-anchored or reversible perturbation test.</div>
+  <h3 style="font-size:13.5px;margin:16px 0 6px">Conflicts (surfaced, never averaged away)</h3>
+  <ul class="warn-list"><li class='muted'>No directional conflicts among the evidence.</li></ul>
+  <h3 style="font-size:13.5px;margin:16px 0 6px">Named gaps (not queried this run)</h3>
+  <ul class="warn-list"><li class='muted'>No unexamined causal dimensions for this arrow.</li></ul>
+</div>
+
+<h2>Honest limitations</h2>
+<div class="card">
+  
+  <ul class="warn-list"><li>Effect depends on when you intervene; a static tier has no time axis.</li><li>Driver and mediator are both causal; position is a relation, not a coordinate.</li><li>Total and direct effects diverge; conditioning on a mediator can induce collider bias.</li><li>Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit.</li></ul>
+</div>
+
+<h2>References &amp; provenance</h2>
+<div class="card"><ul class="refs"><li><span class="tag tag-live">RETRIEVED</span> <code>10.1093/nar/gkac1046</code> — retrieved from Open Targets Platform (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); doi:10.1093/nar/gkac1046), accession opentargets_ENSG00000188906, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:15680455</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs34637584, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:15541308</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs33939927, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:16157909</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs34995376, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:15541309</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs34805604, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:15541308</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs35801418, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>PMID:15541309</code> — retrieved from Open Targets (genetics: GWAS / burden / ClinVar) (Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item; doi:10.1093/nar/gkac1046), accession otgenetics_eva_rs35870237, A (open, keyless)</li><li><span class="tag tag-live">RETRIEVED</span> <code>10.1038/s41586-020-2308-7</code> — retrieved from gnomAD (Karczewski et al., Nature 581:434 (2020); doi:10.1038/s41586-020-2308-7), accession gnomad_constraint_LRRK2, A (open, keyless)</li></ul></div>
+
+</div></body></html>

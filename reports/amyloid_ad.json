@@ -1,0 +1,273 @@
+{
+  "target": "APP/amyloid",
+  "disease": "Alzheimer's disease",
+  "context": {
+    "cell_type": null,
+    "tissue": null,
+    "background": null,
+    "ancestry": null,
+    "sex": null,
+    "disease_subtype": null,
+    "stage": null,
+    "dose": null,
+    "time": null
+  },
+  "dimensions": {
+    "genetic": {
+      "dimension": "genetic",
+      "tier": "strong",
+      "items": [
+        {
+          "id": "app_dominant",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "genetic",
+          "evidence_type": "rare_penetrant_variant",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "APP mutation carriers do not develop AD"
+          ],
+          "source": "10.1038/349704a0",
+          "provenance_group": "app_adad",
+          "contradicts": [],
+          "notes": null
+        },
+        {
+          "id": "app_a673t",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "genetic",
+          "evidence_type": "protective_allele",
+          "direction": "target_down_disease_down",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "A673T carriers show normal AD incidence"
+          ],
+          "source": "10.1038/nature11283",
+          "provenance_group": "app_iceland",
+          "contradicts": [],
+          "notes": "Same gene, opposite direction: reduces Abeta production and lowers AD risk. The causal unit is a specific perturbation of one processing pathway."
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "APP mutation carriers do not develop AD"
+    },
+    "association": {
+      "dimension": "association",
+      "tier": "weak",
+      "items": [
+        {
+          "id": "amyloid_plaque_xsec",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "association",
+          "evidence_type": "cross_sectional",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "disease_pathology",
+          "assumptions_required": [
+            "no_selection_bias"
+          ],
+          "falsified_by": [
+            "Plaque burden shown to correlate tightly with cognition"
+          ],
+          "source": "10.1212/WNL.0b013e31820af900",
+          "provenance_group": "amyloid_plaque_autopsy",
+          "contradicts": [],
+          "notes": "Plaque burden correlates poorly with cognitive status; many cognitively normal elderly carry heavy plaque load. Weak, and direction-less by design."
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_selection_bias"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "Plaque burden shown to correlate tightly with cognition"
+    },
+    "temporal": {
+      "dimension": "temporal",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "dian_cascade",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "temporal",
+          "evidence_type": "anchored_onset_cohort",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "biomarker",
+          "assumptions_required": [
+            "no_selection_bias"
+          ],
+          "falsified_by": [
+            "Amyloid change follows rather than precedes tau"
+          ],
+          "source": "10.1056/NEJMoa1202753",
+          "provenance_group": "dian_bateman",
+          "contradicts": [],
+          "notes": "Mutation carriers have predictable onset -- a natural time axis anchored to a known driver. Amyloid changes decades before tau, before cognition."
+        }
+      ],
+      "assumptions_load_bearing": [
+        "no_selection_bias"
+      ],
+      "contradicting_items": [],
+      "falsifiability": "Amyloid change follows rather than precedes tau"
+    },
+    "intervention": {
+      "dimension": "intervention",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "lecanemab",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "intervention",
+          "evidence_type": "human_rct",
+          "direction": "target_down_disease_down",
+          "effect": null,
+          "system": "human",
+          "readout": "clinical_outcome",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Amyloid clearance yields zero clinical benefit"
+          ],
+          "source": "10.1056/NEJMoa2212948",
+          "provenance_group": "lecanemab_clarity",
+          "contradicts": [],
+          "notes": "Real but MODEST benefit -- exactly what an upstream, early-acting initiator predicts when intervened on late. Single trial, contested magnitude."
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "Amyloid clearance yields zero clinical benefit"
+    },
+    "mechanism": {
+      "dimension": "mechanism",
+      "tier": "moderate",
+      "items": [
+        {
+          "id": "amyloid_mech",
+          "target": "APP/amyloid",
+          "disease": "Alzheimer's disease",
+          "dimension": "mechanism",
+          "evidence_type": "biochemical_pathway",
+          "direction": "target_up_disease_up",
+          "effect": null,
+          "system": "human",
+          "readout": "molecular_profile",
+          "assumptions_required": [],
+          "falsified_by": [
+            "Amyloid cascade hypothesis mechanistically refuted"
+          ],
+          "source": "10.15252/emmm.201606210",
+          "provenance_group": "amyloid_cascade_mech",
+          "contradicts": [],
+          "notes": null
+        }
+      ],
+      "assumptions_load_bearing": [],
+      "contradicting_items": [],
+      "falsifiability": "Amyloid cascade hypothesis mechanistically refuted"
+    }
+  },
+  "composite": "likely_causal",
+  "archetype": "upstream_initiator",
+  "inus": {
+    "necessity": "supported",
+    "sufficiency": "supported"
+  },
+  "posterior": {
+    "value": 0.6830394766424176,
+    "prior": 0.1,
+    "prior_source": "base rate for a gene with prior monogenic evidence (curated set)",
+    "calibrated": false,
+    "reliability_bin": null
+  },
+  "archetype_rationale": "Strong genetic causal support pairs with weak concurrent correlation, the signature of a node that acts early in the cascade and whose association to the measured outcome decays as causal distance grows. For illustration, amyloid in Alzheimer's disease -- bidirectional genetics, changes decades before symptoms, yet weak concurrent correlation with cognition.",
+  "next_experiment": "A prevention-arm trial in mutation carriers (do(clear amyloid) BEFORE symptom onset). The modest late-intervention benefit is exactly what an early initiator predicts; the untested contrast is early intervention.",
+  "not_examined": [],
+  "stopped_because": null,
+  "conflicts": [],
+  "coarse_label_warning": false,
+  "known_limitations": [
+    "Effect depends on when you intervene; a static tier has no time axis.",
+    "Driver and mediator are both causal; position is a relation, not a coordinate.",
+    "Total and direct effects diverge; conditioning on a mediator can induce collider bias.",
+    "Subgroup causality: a target causal only in a molecular subset needs (target, disease, subgroup) as the unit."
+  ],
+  "csp_profile": {
+    "A1": 3,
+    "A2": 3,
+    "A3": 2,
+    "A4": 2,
+    "B1": 0,
+    "B2": 3,
+    "B3": 0,
+    "B4": 3
+  },
+  "verdict_line": "upstream_initiator [necessary_and_sufficient] | scope: unscoped (no context specified -- verdict is not context-conditional) | tier: likely_causal | likely causal, uncalibrated (prior 0.10 from base rate for a gene with prior monogenic evidence (curated set))",
+  "provenance": {
+    "validation_banner": "6 figure(s) from curated fixtures carry placeholder citations (TODO:cite) \u2014 tagged [UNVERIFIED]; replace from the primary paper before use.",
+    "sources": [
+      {
+        "source": "10.1038/349704a0",
+        "provenance_group": "app_adad",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1038/349704a0 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1038/nature11283",
+        "provenance_group": "app_iceland",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1038/nature11283 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1212/WNL.0b013e31820af900",
+        "provenance_group": "amyloid_plaque_autopsy",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1212/WNL.0b013e31820af900 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1056/NEJMoa1202753",
+        "provenance_group": "dian_bateman",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1056/NEJMoa1202753 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.1056/NEJMoa2212948",
+        "provenance_group": "lecanemab_clarity",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.1056/NEJMoa2212948 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      },
+      {
+        "source": "10.15252/emmm.201606210",
+        "provenance_group": "amyloid_cascade_mech",
+        "datasource": "Hand-curated literature fixture",
+        "provenance_tag": "[UNVERIFIED]",
+        "live": false,
+        "citation": "10.15252/emmm.201606210 (primary; Hand-curated literature fixture, C (paper-attached)) [UNVERIFIED]"
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # proj-CAUala — Engineering Build Brief
 
-> 🧭 **Build — the engineering spec.** How the tool is designed and constructed. For *what actually shipped* (and how to run it), read [IMPLEMENTATION.md](IMPLEMENTATION.md); to add a data source, [docs/CONNECTORS.md](docs/CONNECTORS.md). Full map: **[docs/README.md](docs/README.md)**.
+> 🧭 **Build — the engineering spec.** How the tool is designed and constructed. For *what actually shipped* (and how to run it), read [IMPLEMENTATION.md](IMPLEMENTATION.md); to add a data source, [docs/CONNECTORS.md](CONNECTORS.md). Full map: **[docs/README.md](README.md)**.
 
 **Audience:** the developer or coding agent who will build the tool.
 **Prereqs (read in this order):** `CONCEPTS.md` (the causal reasoning), `DESIGN.md`
