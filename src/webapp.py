@@ -278,9 +278,9 @@ INDEX_HTML = r"""<!doctype html>
   <div class="left">
     <h2 class="sec">Your question</h2>
     <label>Source (gene / variant)</label>
-    <input id="source" placeholder="e.g. PCSK9" value="PCSK9" autocomplete="off">
+    <input id="source" placeholder="e.g. PCSK9, LRRK2, tau" autocomplete="off">
     <label>Target (disease / phenotype)</label>
-    <input id="target" placeholder="e.g. coronary artery disease" value="coronary artery disease" autocomplete="off">
+    <input id="target" placeholder="e.g. Parkinson disease" autocomplete="off">
     <label>Edge (which arrow?)</label>
     <select id="edge">
       <option value="causal_risk">causal_risk (gene → disease risk)</option>
