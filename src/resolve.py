@@ -145,6 +145,19 @@ def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
 
 
+# Smart quotes / dashes a keyboard or paste inserts, mapped to ASCII. A curly
+# apostrophe (U+2019) makes the Open Targets search return zero hits, so
+# "Huntington's disease" would fail while the ASCII form resolves fine.
+_SMART = str.maketrans({
+    "’": "'", "‘": "'", "“": '"', "”": '"',
+    "–": "-", "—": "-", " ": " ", "​": "",
+})
+
+
+def _clean_input(s: str) -> str:
+    return s.translate(_SMART).strip()
+
+
 @dataclass
 class Candidate:
     id: str
@@ -200,7 +213,7 @@ class EntityResolver:
         self.online = online
         self.timeout = timeout
 
-    def _search(self, text: str, entities: Optional[list[str]]) -> list[Candidate]:
+    def _search_once(self, text: str, entities: Optional[list[str]]) -> list[Candidate]:
         data = _post(_SEARCH, {"s": text, "e": entities}, self.timeout)
         if not data:
             return []
@@ -215,6 +228,14 @@ class EntityResolver:
                     score=float(h.get("score") or 0.0),
                 )
             )
+        return out
+
+    def _search(self, text: str, entities: Optional[list[str]]) -> list[Candidate]:
+        out = self._search_once(text, entities)
+        # Fall back to an apostrophe-free query -- "Huntington disease" outscores
+        # "Huntington's disease" in Open Targets, and some possessive forms miss.
+        if not out and "'" in text:
+            out = self._search_once(text.replace("'", " ").replace("  ", " ").strip(), entities)
         return out
 
     def resolve_variant(self, text: str) -> Optional[dict]:
@@ -250,6 +271,7 @@ class EntityResolver:
         if not self.online:
             return Resolution(text, "not_found", note="Resolver offline; use the built-in table or --online.")
 
+        text = _clean_input(text)  # curly apostrophes/dashes -> ASCII before searching
         types = expected_types or []
         source_scope = any(t in (NodeType.GENE, NodeType.PROTEIN, NodeType.VARIANT) for t in types)
         vinfo = classify_variant(text)
