@@ -28,7 +28,7 @@ you immediately what it is and who it's for.
 |---|---|
 | [README.md](../README.md) | **Front door** — what CAUala is, in one page. |
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | **The guide** — install, run (CLI + web), and the module-by-module map of what was built. |
-| [DEPLOY.md](DEPLOY.md) | **Host it** — put CAUala on a public URL (Hugging Face Spaces, Render, Docker, …). |
+| [DEPLOY.md](DEPLOY.md) | **Host it** — put CAUala on a public URL (Render, Docker, …). Live at cauala.onrender.com. |
 
 ### 🧠 Understand (the science & design)
 | Document | Role |

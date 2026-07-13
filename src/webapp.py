@@ -290,10 +290,12 @@ INDEX_HTML = r"""<!doctype html>
     </select>
     <div class="examples">
       <button data-s="PCSK9" data-t="coronary artery disease">PCSK9 → CAD</button>
-      <button data-s="HDL-C" data-t="coronary artery disease">HDL-C → CAD</button>
+      <button data-s="CETP" data-t="coronary artery disease">HDL/CETP → CAD</button>
       <button data-s="CRP" data-t="coronary artery disease">CRP → CAD</button>
-      <button data-s="APP/amyloid" data-t="Alzheimer's disease">amyloid → AD</button>
+      <button data-s="APP" data-t="Alzheimer's disease">amyloid (APP) → AD</button>
       <button data-s="tau" data-t="Alzheimer's disease">tau → AD</button>
+      <button data-s="LRRK2" data-t="Parkinson's disease">LRRK2 → PD (live)</button>
+      <button data-s="LRRK2 G2019S" data-t="Parkinson's disease">LRRK2 G2019S → PD</button>
     </div>
     <details>
       <summary>Advanced</summary>

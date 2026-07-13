@@ -100,6 +100,15 @@ query Resolve($s: String!, $e: [String!]) {
 }
 """
 
+# Open Targets calls genes "target"; say "gene" to users so a not-found note about
+# a gene isn't mistaken for the disease side of the question.
+_FRIENDLY_ENTITY = {"target": "gene", "disease": "disease", "drug": "drug"}
+
+# A few gene display-labels that are not searchable symbols (keys are _norm()'d).
+GENE_ALIASES: dict[str, str] = {
+    "amyloid": "APP", "app amyloid": "APP", "abeta": "APP", "a beta": "APP",
+}
+
 # A dominant hit is at least this many times the runner-up's score.
 _DOMINANCE = 1.6
 # Below this search score a non-exact top hit is treated as no confident match
@@ -279,19 +288,22 @@ class EntityResolver:
         if disease_scope:
             nraw = _norm(raw)
             query = DISEASE_ALIASES.get(nraw) or DISEASE_ALIASES.get(nraw.replace(" ", "")) or raw
+        elif any(t in (NodeType.GENE, NodeType.PROTEIN) for t in types):
+            query = GENE_ALIASES.get(_norm(raw), raw)
         aliased = query != raw
 
         hits = self._search(query, entities)
         if not hits:
             # A mutation is not free-text searchable -- say what to do instead.
             v = classify_variant(raw)
+            friendly = " / ".join(_FRIENDLY_ENTITY.get(e, e) for e in entities) if entities else "entity"
             if v.kind == "protein_change":
                 hint = (f"'{raw}' looks like a protein-change mutation. I can appraise the gene "
                         f"'{v.gene or raw}' instead, or give me the rsID for the specific variant.")
             elif v.kind == "rsid":
                 hint = f"'{raw}' is an rsID; variant-level appraisal is a separate path from gene/disease."
             else:
-                hint = f"No {' / '.join(entities) if entities else 'entity'} matched '{raw}'. Check spelling or try the full name."
+                hint = f"No {friendly} matched '{raw}'. Check spelling or try the full name."
             return Resolution(raw, "not_found", note=hint)
 
         hits.sort(key=lambda c: c.score, reverse=True)

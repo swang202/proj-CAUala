@@ -4,6 +4,9 @@
 *"A causes B, in context C, to this degree, with this confidence — and here is the
 experiment that would prove me wrong."*
 
+### 🌐 Live demo → **[cauala.onrender.com](https://cauala.onrender.com)**
+Type a gene and a disease, watch it query real databases, and read the cited report. No install.
+
 ---
 
 ## What this is, and why it exists
@@ -75,14 +78,21 @@ runs end-to-end on real data; more live sources are being added.
 
 ## What you get back
 
-Ask *"does PCSK9 cause coronary artery disease?"* and you get back a structured,
-cited report — not a single number:
+Ask a causal question — **does A cause B?** — and you get back a structured, cited
+report, not a single number. The atomic claim is `A → B | context`, so **A and B can
+be any two typed biological things** — a variant, gene, protein, pathway, cell state,
+phenotype, disease, or drug — and the arrow is not only "causes a disease." The same
+machinery answers *does one gene regulate another?*, *does the disease change this
+gene's expression?*, or *does this drug produce that phenotype?* Each question routes
+to the evidence that can actually settle **that** arrow.
+
+The report gives:
 
 - a **headline verdict tier** (`causal_driver` → `likely_causal` → `plausible` →
   `unvalidated` → `likely_noncausal` → `refuted`);
 - a **structural position** (validated driver, associated-but-not-causal, upstream
   initiator, downstream mediator, …);
-- **necessity × sufficiency** (is the target required, enough, both, or neither?);
+- **necessity × sufficiency** (is A required, enough, both, or neither?);
 - the **context** the verdict is scoped to;
 - a **confidence band** (subordinate to the tier, and honest that it's uncalibrated);
 - the **evidence for and against**, each **cited and tagged for validation**;
@@ -92,13 +102,23 @@ cited report — not a single number:
 Every figure pulled from a live database is tagged `[RETRIEVED]` (verify in-source);
 nothing is presented as a checked fact that hasn't been checked.
 
+> **Scope, honestly.** Today the live data is strongest for **A → disease** questions
+> (variant/gene → disease). The other arrows — **gene → gene** regulation, **disease
+> → gene** (the reverse-causation trap), **drug → phenotype** — are already typed in
+> the question registry and are the expansion path, as their perturbation and
+> expression connectors come online. The full ontology of node and edge types is in
+> **[CONCEPTS.md](CONCEPTS.md)**.
+
 ---
 
 ## Try it in 30 seconds
 
-**A hosted website is on the way** — I am setting it up on Render right now, so soon
-you will be able to open a link and use CAUala with no install at all. In the
-meantime, it runs locally in a few commands:
+**No install needed — use the live app: [cauala.onrender.com](https://cauala.onrender.com).**
+Type a gene and a disease, watch it stream *what it's looking at right now*, and read
+the cited report. (Free tier: the first visit after it's been idle may take ~30 s to
+wake up, then it's fast.)
+
+Or run it locally:
 
 ```bash
 # one-time setup
@@ -114,10 +134,9 @@ uv pip install --python .venv -e '.[web]'      # or: pip install -r requirements
 # offline (curated evidence, no network):  add  --offline
 ```
 
-The web app is the easiest entry point for non-technical users: type a gene and a
-disease, watch it stream *what it's looking at right now* (which databases it's
-querying, what it found), then read the report in the page. Full install, all CLI
-commands, and the architecture are in **[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)**.
+The local web app is the same one that's hosted — a browser form with live progress
+and a rendered report. Full install, all CLI commands, and the architecture are in
+**[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)**.
 
 ---
 
@@ -151,7 +170,7 @@ version:
 | `tests/` | The 26 known-answer tests + pipeline, web, and opt-in live tests. |
 | `docs/` | The documentation hub and guides — start at [docs/README.md](docs/README.md). |
 | `reports/`, `schemas/` | **Generated** — reports via `cauala appraise --out`, schemas via `cauala export-schemas`. Git-ignored, not committed. |
-| `Dockerfile`, `render.yaml`, `fly.toml`, `Procfile`, `deploy/` | Hosting configs — see [docs/DEPLOY.md](docs/DEPLOY.md). |
+| `Dockerfile`, `render.yaml`, `fly.toml`, `Procfile` | Hosting configs — see [docs/DEPLOY.md](docs/DEPLOY.md). |
 
 ---
 

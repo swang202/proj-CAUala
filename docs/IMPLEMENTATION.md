@@ -35,11 +35,11 @@ Install the web extra with `uv pip install --python .venv -e '.[web]'`.
 
 **Hosting it as a public website:** the app reads `$PORT`/`$HOST`, has a
 `/healthz` check, CORS on the JSON API, and a concurrency cap. Ship-ready configs
-are in the repo root — `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, and a
-Hugging Face Space template — with step-by-step instructions for each host in
+are in the repo root — `render.yaml`, `Dockerfile`, `Procfile`, `fly.toml` — with
+step-by-step instructions for each host in
 [`docs/DEPLOY.md`](DEPLOY.md). Note: it needs a Python-capable host (it runs
-server-side), so a pure static host like GitHub Pages will not work; Hugging Face
-Spaces or Render are the easiest free options.
+server-side), so a pure static host like GitHub Pages will not work; Render is the
+easiest free option (it's what the live demo runs on).
 
 `appraise` is **online by default** — it queries live databases and every figure
 is cited to its source and tagged `[RETRIEVED]` (verify in-source) or `[UNVERIFIED]`
