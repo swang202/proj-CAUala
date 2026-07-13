@@ -168,7 +168,7 @@ class Composite(str, Enum):
 
 class NecessitySufficiency(str, Enum):
     """
-    The INUS sub-field (docs/memo.md). ORTHOGONAL to position: a driver or mediator
+    The INUS sub-field (MEMO.md). ORTHOGONAL to position: a driver or mediator
     ALSO occupies one of these boxes, and the box decides the therapeutic
     implication.
 

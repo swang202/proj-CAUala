@@ -1,6 +1,6 @@
 # Concepts
 
-> 🧭 **Understand — the causal framework.** *Why* the scoring is shaped the way it is (Bradford Hill + Pearl, re-derived for biology). For the *why-it-exists*, read [memo.md](memo.md) first; for *what shipped*, see [IMPLEMENTATION.md](docs/IMPLEMENTATION.md). Full map: **[docs/README.md](docs/README.md)**.
+> 🧭 **Understand — the causal framework.** *Why* the scoring is shaped the way it is (Bradford Hill + Pearl, re-derived for biology). For the *why-it-exists*, read [MEMO.md](MEMO.md) first; for *what shipped*, see [IMPLEMENTATION.md](docs/IMPLEMENTATION.md). Full map: **[docs/README.md](docs/README.md)**.
 
 *This is the conceptual reference — the reasoning behind how the tool scores
 evidence. It is disease-agnostic; the worked examples come from areas where the

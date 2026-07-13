@@ -1,6 +1,6 @@
 # proj-CAUala — Critique: Loopholes in the Logic and the Process
 
-> 🧭 **Understand — the reasoning stress-test.** The loopholes in the logic, found and closed before any code. Context: [memo.md](../memo.md) and [CONCEPTS.md](../CONCEPTS.md). Docs map: **[docs index](README.md)**.
+> 🧭 **Understand — the reasoning stress-test.** The loopholes in the logic, found and closed before any code. Context: [MEMO.md](../MEMO.md) and [CONCEPTS.md](../CONCEPTS.md). Docs map: **[docs index](README.md)**.
 
 *A stress-test of the memo + README against the causal-inference framework, before you hand anything to an engineer. Read this first; the file rewrites and the build brief act on everything here.*
 

@@ -1,6 +1,6 @@
 # proj-CAUala — implementation guide
 
-> 🧭 **Use & build — run it + architecture.** What shipped, how to run it (CLI + web + tests), and where each piece lives. New to the project? Start at [memo.md](../memo.md). Full map: **[docs/README.md](README.md)**.
+> 🧭 **Use & build — run it + architecture.** What shipped, how to run it (CLI + web + tests), and where each piece lives. New to the project? Start at [MEMO.md](../MEMO.md). Full map: **[docs/README.md](README.md)**.
 
 What was built against `build-brief.md`, how to run it, and where each piece of the
 brief lives in code. The architecture is the brief's **hybrid**: a deterministic
@@ -35,7 +35,7 @@ Install the web extra with `uv pip install --python .venv -e '.[web]'`.
 
 **Hosting it as a public website:** the app reads `$PORT`/`$HOST`, has a
 `/healthz` check, CORS on the JSON API, and a concurrency cap. Ship-ready configs
-are in the repo root — `render.yaml`, `Dockerfile`, `Procfile`, `fly.toml` — with
+are in the repo root — `render.yaml`, `Dockerfile` — with
 step-by-step instructions for each host in
 [`docs/DEPLOY.md`](DEPLOY.md). Note: it needs a Python-capable host (it runs
 server-side), so a pure static host like GitHub Pages will not work; Render is the

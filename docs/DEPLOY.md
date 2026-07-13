@@ -1,6 +1,6 @@
 # Hosting CAUala as a website
 
-> 🧭 **Use — host it.** Put CAUala on a public URL so non-CLI users can just visit and ask. Ship-ready configs (`render.yaml`, `Dockerfile`, `Procfile`, `fly.toml`) live in the repo root. Docs map: **[docs index](README.md)**.
+> 🧭 **Use — host it.** Put CAUala on a public URL so non-CLI users can just visit and ask. Ship-ready configs (`render.yaml`, `Dockerfile`) live in the repo root. Docs map: **[docs index](README.md)**.
 
 Goal: give non-CLI users a URL where they type a gene + disease and get an answer,
 while CLI users can still clone the repo.
@@ -26,8 +26,6 @@ files for the common hosts ship in the repo root.
 | Host | Cost | Best for | Files used |
 |---|---|---|---|
 | **Render** ← *currently deployed* | free tier | simplest "connect a GitHub repo" | `render.yaml` |
-| **Railway** | small credit | fast Git deploys | `Procfile` |
-| **Fly.io** | scales to zero | global, cheap idle | `fly.toml` + `Dockerfile` |
 | **Google Cloud Run** | pay-per-use, generous free | scales to zero, containers | `Dockerfile` |
 | **Any Docker host / your VPS** | your box | full control | `Dockerfile` |
 
@@ -46,19 +44,7 @@ The live demo runs here: **<https://cauala.onrender.com>**. To reproduce it:
 The free instance sleeps after ~15 min idle and cold-starts in ~30–60 s; the **$7/mo
 Starter** plan stays always-on if you're presenting live.
 
-### B. Railway
-
-1. Push to GitHub. Railway → **New Project → Deploy from GitHub repo**.
-2. It detects `Procfile` and Python. Add a public domain in **Settings → Networking**.
-
-### C. Fly.io
-
-```bash
-fly launch --copy-config --now     # reads fly.toml, builds the Dockerfile
-```
-Live at `https://cauala.fly.dev`. `min_machines_running = 0` scales to zero when idle.
-
-### D. Google Cloud Run
+### B. Google Cloud Run
 
 ```bash
 gcloud run deploy cauala --source . --region us-central1 --allow-unauthenticated
@@ -66,7 +52,7 @@ gcloud run deploy cauala --source . --region us-central1 --allow-unauthenticated
 Cloud Run builds the `Dockerfile`, injects `$PORT`, and scales to zero. Live at a
 `*.run.app` URL.
 
-### E. Docker anywhere (or locally)
+### C. Docker anywhere (or locally)
 
 ```bash
 docker build -t cauala .

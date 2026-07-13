@@ -14,7 +14,7 @@ you immediately what it is and who it's for.
 |---|---|
 | **Just get an answer** — type a gene + disease, no install | The hosted site (ask the maintainer for the URL) or run the web app: [Guide → Quick start](IMPLEMENTATION.md) |
 | **Run it on my machine** (CLI or local web app) | [Guide (IMPLEMENTATION.md)](IMPLEMENTATION.md) |
-| **Understand what it claims & the science** | [memo.md](../memo.md) → [CONCEPTS.md](../CONCEPTS.md) |
+| **Understand what it claims & the science** | [MEMO.md](../MEMO.md) → [CONCEPTS.md](../CONCEPTS.md) |
 | **Host it as a website for others** | [DEPLOY.md](DEPLOY.md) |
 | **Connect or add a database** | [CONNECTORS.md](CONNECTORS.md) |
 | **Read the engineering spec / extend it** | [build-brief.md](build-brief.md) + [Guide](IMPLEMENTATION.md) |
@@ -33,7 +33,7 @@ you immediately what it is and who it's for.
 ### 🧠 Understand (the science & design)
 | Document | Role |
 |---|---|
-| [memo.md](../memo.md) | **Why it exists** — the problem, and why generic causal rules break in biology. *Best first read.* |
+| [MEMO.md](../MEMO.md) | **Why it exists** — the problem, and why generic causal rules break in biology. *Best first read.* |
 | [CONCEPTS.md](../CONCEPTS.md) | **The framework** — Bradford Hill + Pearl, re-derived for molecular biology. |
 | [CAUala-critique.md](CAUala-critique.md) | **The stress-test** — loopholes in the logic, found and closed before any code. |
 
@@ -60,7 +60,7 @@ you immediately what it is and who it's for.
 | `scoring/` | Editable YAML: the CSP scoring rubric. |
 | `tests/` | The 26 known-answer tests + pipeline, web, and opt-in live tests. |
 | `reports/`, `schemas/` | **Generated** (git-ignored) — regenerate with `cauala appraise --out` / `cauala export-schemas`. |
-| `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, `deploy/` | Hosting configs — see [DEPLOY.md](DEPLOY.md). |
+| `render.yaml`, `Dockerfile` | Hosting configs — see [DEPLOY.md](DEPLOY.md). |
 
 The full module-by-module map lives in the [guide](IMPLEMENTATION.md).
 
@@ -68,7 +68,7 @@ The full module-by-module map lives in the [guide](IMPLEMENTATION.md).
 
 ## Newcomer reading order
 
-1. [memo.md](../memo.md) — *why* this exists (~5 min).
+1. [MEMO.md](../MEMO.md) — *why* this exists (~5 min).
 2. [README.md](../README.md) — *what* it does.
 3. [CONCEPTS.md](../CONCEPTS.md) — *how* the causal reasoning is shaped.
 4. [IMPLEMENTATION.md](IMPLEMENTATION.md) — run it, and see how the pieces fit.

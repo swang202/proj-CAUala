@@ -4,7 +4,7 @@
 
 **Audience:** the developer or coding agent who will build the tool.
 **Prereqs (read in this order):** `CONCEPTS.md` (the causal reasoning), `DESIGN.md`
-(the reconciled spec — the arbiter when anything conflicts), `memo.md` (motivation),
+(the reconciled spec — the arbiter when anything conflicts), `MEMO.md` (motivation),
 `src/schema.py` + `tests/test_known_answers.py` (the data model, already built and
 passing). Skim `CAUala-critique.md` for the reasoning constraints.
 

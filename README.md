@@ -31,7 +31,7 @@ decides which evidence can settle it — and it always answers **conditionally**
 (`A → B | context`), never with a context-free yes or no.
 
 > The deeper motivation (and why the textbook causal rules break in molecular
-> biology) is in **[memo.md](memo.md)**; the reasoning framework is in
+> biology) is in **[MEMO.md](MEMO.md)**; the reasoning framework is in
 > **[CONCEPTS.md](CONCEPTS.md)**.
 
 ---
@@ -148,7 +148,7 @@ version:
 
 | I want to… | Go to |
 |---|---|
-| **Understand what it is and why** | [memo.md](memo.md) — the motivation (best first read) |
+| **Understand what it is and why** | [MEMO.md](MEMO.md) — the motivation (best first read) |
 | **Understand the causal reasoning** | [CONCEPTS.md](CONCEPTS.md) — the framework |
 | **Install & run it** (CLI + web) | [IMPLEMENTATION.md](docs/IMPLEMENTATION.md) — the guide |
 | **Host it as a website** for others | [docs/DEPLOY.md](docs/DEPLOY.md) |
@@ -170,7 +170,7 @@ version:
 | `tests/` | The 26 known-answer tests + pipeline, web, and opt-in live tests. |
 | `docs/` | The documentation hub and guides — start at [docs/README.md](docs/README.md). |
 | `reports/`, `schemas/` | **Generated** — reports via `cauala appraise --out`, schemas via `cauala export-schemas`. Git-ignored, not committed. |
-| `Dockerfile`, `render.yaml`, `fly.toml`, `Procfile` | Hosting configs — see [docs/DEPLOY.md](docs/DEPLOY.md). |
+| `Dockerfile`, `render.yaml` | Hosting configs — see [docs/DEPLOY.md](docs/DEPLOY.md). |
 
 ---
 
