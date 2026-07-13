@@ -13,9 +13,11 @@ env/
 # OS
 .DS_Store
 
-# Generated JSON Schemas (regenerate with `cauala export-schemas`)
-/schemas/*.json
+# Generated outputs (regenerate with the CLI; never version-controlled)
+# schemas/ via `cauala export-schemas`; reports/ via `cauala appraise --out`
+/schemas/
+/reports/
 
-# Local caches
+# Local caches / bulk data
 *.duckdb
 *.parquet

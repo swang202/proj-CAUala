@@ -55,11 +55,11 @@ you immediately what it is and who it's for.
 
 | Path | What's there |
 |---|---|
-| `src/` | The deterministic core (`schema`, `scoring`, `scoring_engine`), `connectors/`, `orchestrator`, `report`, `provenance`, `cli`, `webapp`. |
+| `src/` | The deterministic core (`schema`, `scoring`, `scoring_engine`, `exemplars`), entity `resolve`, `harmonization`, `connectors/`, `orchestrator`, `report`, `provenance`, `validation`, `cli`, `webapp`. |
 | `registry/` | Editable YAML: the evidence-stack registry + the curated offline evidence. |
 | `scoring/` | Editable YAML: the CSP scoring rubric. |
 | `tests/` | The 26 known-answer tests + pipeline, web, and opt-in live tests. |
-| `reports/` | **Generated sample outputs** (example reports — not documentation). |
+| `reports/`, `schemas/` | **Generated** (git-ignored) — regenerate with `cauala appraise --out` / `cauala export-schemas`. |
 | `Dockerfile`, `render.yaml`, `Procfile`, `fly.toml`, `deploy/` | Hosting configs — see [DEPLOY.md](DEPLOY.md). |
 
 The full module-by-module map lives in the [guide](../IMPLEMENTATION.md).

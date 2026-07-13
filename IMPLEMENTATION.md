@@ -55,15 +55,16 @@ is cited to its source and tagged `[RETRIEVED]` (verify in-source) or `[UNVERIFI
 | §1 data model (shipped) | `src/schema.py` | The authoritative schema, moved into the package unchanged. |
 | §1.1 Question | `src/question.py` | The one net-new core object: typed `source → target \| context`. |
 | §2 evidence-stack registry | `registry/evidence_stacks.yaml` | Per `(source,target,edge)` ranked modality stack + key confounders. |
-| §3 connectors | `src/connectors/` | `base.py` contract + cache; `fixtures.py` offline backbone; `opentargets.py` live GraphQL. |
-| §4 harmonization | `src/harmonization.py` | ID resolution + coarse-label detector (never fabricates an id). |
+| §3 connectors | `src/connectors/` | `base.py` contract + cache; `fixtures.py` offline backbone; live: `opentargets.py` (integrated score), `opentargets_genetics.py` (directional GWAS/burden/ClinVar), `opentargets_variant.py` (variant-level evidence), `gnomad.py` (constraint gate). |
+| §4 harmonization | `src/harmonization.py` | Offline ID table + coarse-label detector; delegates online resolution to the resolver. Never fabricates an id. |
+| entity resolution | `src/resolve.py` | Type-constrained universal search + confidence gate + candidates; disease-abbreviation aliases; variant resolution (protein change → rsID via Ensembl → OT variant). |
 | §5 scoring engine | `src/scoring.py`, `src/scoring_engine.py` | The gate + archetype classifier; CSP, INUS arms, subordinate posterior, VOI. |
-| §5 rubric | `scoring/rubric.yaml` | 8-axis CSP anchors, identification gate, per-type axis priors, named confounders. |
-| §6 report builder | `src/report.py` | JSON / Markdown / HTML in the 12-section order + inline-SVG spider chart. |
+| §5 exemplars / rubric | `src/exemplars.py`, `scoring/rubric.yaml` | Disease-area-keyed archetype illustrations; 8-axis CSP anchors, identification gate, per-type axis priors, named confounders. |
+| §6 report builder | `src/report.py` | JSON / Markdown / HTML (12-section order) + inline-SVG spider chart + dimension bars. |
 | §7 validation harness | `src/validation.py`, `tests/test_pipeline.py` | Known-answer recovery + association-vs-causal separation. |
-| orchestration | `src/orchestrator.py` | Routes question → stack → connectors → scorer → appraisal, with VOI + gaps; `appraise_events` streams progress. |
+| orchestration | `src/orchestrator.py` | Routes question → resolve → stack → connectors → scorer → appraisal, with VOI + gaps; `appraise_events` streams progress. |
 | provenance & citation | `src/provenance.py` | Per-figure datasource citation + `[RETRIEVED]`/`[UNVERIFIED]` validation status. |
-| web app | `src/webapp.py` | FastAPI: form page + SSE progress stream + rendered report + JSON API. |
+| web app + CLI | `src/webapp.py`, `src/cli.py` | FastAPI form + SSE stream + disambiguation picker + `/resolve` + JSON API; CLI (`appraise`, `serve`, `demo`, `validate`, `export-schemas`). |
 | schema export | `src/export_schemas.py` | `model_json_schema()` → `schemas/*.json` (draft 2020-12). |
 
 ## How the discipline from the brief is enforced
@@ -116,14 +117,21 @@ The association-strong set `{HDL-C, CRP, tau}` and the causal-strong set
   sporadic-cohort evidence (LOF reduces but does not abolish) would move the arm to
   `sufficiency=refuted`. This is the conditional, context-dependent behaviour the
   tool is designed to expose, not a bug.
-- **Live connectors**: **Open Targets and gnomAD are wired and working** against
-  their real, keyless APIs (`--online`), including online ID resolution (via OT
-  `search`) and self-correcting EFO↔MONDO disease-id retry. The other rows in the
-  §3 catalog have registry entries and a uniform contract but are not yet
-  implemented — see [`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the recipe,
-  auth table, and env-var names for the keyed sources (OpenGWAS JWT, OMIM, CLUE).
-  The offline FixtureConnector remains the reproducible backbone for the demo and
-  tests.
+- **Live connectors**: four keyless live sources are wired and working (`--online`,
+  the default): **Open Targets** integrated score, **Open Targets genetics**
+  (directional GWAS credible-sets / rare-variant burden / ClinVar), **Open Targets
+  variant** (variant-level disease evidence), and **gnomAD** constraint. Entity
+  resolution is universal via `src/resolve.py` (type-constrained Open Targets
+  `search` + a small disease-abbreviation alias layer; garbage rejected, ambiguous
+  handed to a picker). Protein-change **variants are first-class** (`LRRK2 G2019S` →
+  rs34637584 via Ensembl → OT variant → its own disease evidence). Other §3 catalog
+  sources (DepMap, L1000, scPerturb, OpenGWAS-MR, …) have registry entries and a
+  uniform contract but are not yet implemented — see
+  [`docs/CONNECTORS.md`](docs/CONNECTORS.md) for the recipe and auth table. The
+  offline FixtureConnector remains the reproducible backbone for the demo and tests.
+- **Generated outputs are not version-controlled.** `schemas/` (`cauala
+  export-schemas`) and `reports/` (`cauala appraise --out …`) are git-ignored;
+  regenerate them from the CLI rather than expecting them in a fresh clone.
 
 ## Phase status vs the brief roadmap
 

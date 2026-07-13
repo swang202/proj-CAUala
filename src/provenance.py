@@ -46,6 +46,18 @@ _OPEN_TARGETS = DataSource(
     "underlying datatype evidence in-source before use.",
     provenance_tag="[RETRIEVED]",
 )
+_OPEN_TARGETS_GENETICS = DataSource(
+    id="opentargets_genetics",
+    name="Open Targets (genetics: GWAS / burden / ClinVar)",
+    citation="Ochoa et al., Nucleic Acids Research 51:D1353 (2023); primary study PMIDs per item",
+    doi="10.1093/nar/gkac1046",
+    url="https://platform.opentargets.org",
+    access_class="A (open, keyless)",
+    retrieval="live GraphQL query this session",
+    validation="RETRIEVED live — directional genetic evidence; the item's primary study PMID "
+    "should be read in-source, and gene-level direction confirmed with eQTL where inferred.",
+    provenance_tag="[RETRIEVED]",
+)
 _GNOMAD = DataSource(
     id="gnomad",
     name="gnomAD",
@@ -72,10 +84,17 @@ _CURATED = DataSource(
     provenance_tag="[UNVERIFIED]",
 )
 
-DATA_SOURCES: dict[str, DataSource] = {s.id: s for s in (_OPEN_TARGETS, _GNOMAD, _CURATED)}
+DATA_SOURCES: dict[str, DataSource] = {
+    s.id: s for s in (_OPEN_TARGETS, _OPEN_TARGETS_GENETICS, _GNOMAD, _CURATED)
+}
 
-# Prefixes that identify a live-retrieved item by its provenance_group.
-_LIVE_PREFIXES = {"opentargets": "opentargets", "gnomad": "gnomad"}
+# Prefixes that identify a live-retrieved item by its provenance_group. Order the
+# genetics prefix first so "otgenetics_*" is not shadowed by any other match.
+_LIVE_PREFIXES = {
+    "opentargets_genetics": "otgenetics",
+    "opentargets": "opentargets",
+    "gnomad": "gnomad",
+}
 
 
 def source_of(item: EvidenceItem) -> DataSource:

@@ -25,6 +25,7 @@ from typing import Optional
 from src.orchestrator import Orchestrator
 from src.question import Context, EdgeType, Node, NodeType, Question
 from src.report import to_html, to_json
+from src.resolve import EntityResolver
 
 try:
     from fastapi import FastAPI, Query
@@ -63,10 +64,18 @@ def _question(
     ancestry: Optional[str],
     tissue: Optional[str],
     disease_subtype: Optional[str],
+    source_id: Optional[str] = None,
+    target_id: Optional[str] = None,
+    source_label: Optional[str] = None,
+    target_label: Optional[str] = None,
 ) -> Question:
+    # When ids are supplied (the user confirmed them in the picker), the nodes are
+    # pre-resolved and the pipeline skips its own resolution step.
     return Question(
-        source=Node(type=NodeType(source_type), symbol=source),
-        target=Node(type=NodeType(target_type), symbol=target),
+        source=Node(type=NodeType(source_type), symbol=source, id=source_id or None,
+                    label=source_label or None),
+        target=Node(type=NodeType(target_type), symbol=target, id=target_id or None,
+                    label=target_label or None),
         edge_type=EdgeType(edge),
         context=Context(ancestry=ancestry or None, tissue=tissue or None,
                         disease_subtype=disease_subtype or None),
@@ -100,8 +109,13 @@ async def stream(
     ancestry: Optional[str] = Query(None),
     tissue: Optional[str] = Query(None),
     disease_subtype: Optional[str] = Query(None),
+    source_id: Optional[str] = Query(None),
+    target_id: Optional[str] = Query(None),
+    source_label: Optional[str] = Query(None),
+    target_label: Optional[str] = Query(None),
 ) -> StreamingResponse:
-    q = _question(source, target, edge, source_type, target_type, ancestry, tissue, disease_subtype)
+    q = _question(source, target, edge, source_type, target_type, ancestry, tissue,
+                  disease_subtype, source_id, target_id, source_label, target_label)
     orch = Orchestrator(online=not offline)
 
     async def gen():
@@ -146,6 +160,27 @@ async def api_appraise(
     async with _SEM:
         appraisal = await orch.appraise(q)
     return JSONResponse(json.loads(to_json(appraisal)))
+
+
+@app.get("/resolve")
+def resolve(text: str = Query(...), node_type: str = Query("disease")) -> JSONResponse:
+    """Resolve free text to an entity, returning the confident guess or the
+    candidates to disambiguate. A GUI can call this as the user types (or on blur)
+    to offer a 'did you mean …?' picker before running the appraisal."""
+    try:
+        nt = NodeType(node_type)
+    except ValueError:
+        nt = NodeType.DISEASE
+    res = EntityResolver(online=True).resolve(text, [nt])
+    return JSONResponse({
+        "query": res.query,
+        "status": res.status,  # resolved | ambiguous | not_found
+        "note": res.note,
+        "best": ({"id": res.best.id, "name": res.best.name, "entity": res.best.entity}
+                 if res.best and res.status != "not_found" else None),
+        "candidates": [{"id": c.id, "name": c.name, "entity": c.entity, "score": round(c.score, 1)}
+                       for c in res.candidates],
+    })
 
 
 def serve(host: Optional[str] = None, port: Optional[int] = None) -> None:
@@ -203,6 +238,7 @@ INDEX_HTML = r"""<!doctype html>
   .badge { flex:0 0 auto; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:6px; text-transform:uppercase; }
   .b-start,.b-harmonize,.b-resolve,.b-stack,.b-retrieve{ background:#1e2a52; color:#9db4ff; }
   .b-query{ background:#173a35; color:var(--teal); }
+  .b-clarify{ background:#3a2c08; color:var(--warn); }
   .b-assemble,.b-finalize{ background:#2a2350; color:#c4b5fd; }
   .b-gate,.b-classify{ background:#14351f; color:var(--good); }
   .b-done{ background:var(--good); color:#04240f; }
@@ -220,6 +256,16 @@ INDEX_HTML = r"""<!doctype html>
   iframe#report { width:100%; height:78vh; border:1px solid var(--line); border-radius:12px; background:#fff; margin-top:8px; }
   .hint { color:var(--muted); font-size:13px; }
   a.dl { color:var(--teal); font-size:12px; text-decoration:none; }
+  #picker { background:var(--panel); border:1px solid var(--warn); border-radius:12px; padding:14px 16px; margin-bottom:16px; }
+  #picker h3 { margin:0 0 4px; font-size:14px; }
+  .pick { margin:12px 0; }
+  .pick-q { font-size:13px; margin-bottom:4px; }
+  .pick-note { font-size:12px; color:var(--muted); margin:3px 0 8px; }
+  .cand { display:block; width:100%; text-align:left; margin:5px 0; padding:9px 12px; background:var(--bg);
+          border:1px solid var(--line); border-radius:8px; color:var(--ink); font-size:13px; cursor:pointer; }
+  .cand:hover { border-color:var(--accent); }
+  .cand.sel { border-color:var(--teal); background:#13251f; }
+  .cand .ent { color:var(--muted); font-size:11px; }
 </style></head>
 <body>
 <header>
@@ -267,6 +313,7 @@ INDEX_HTML = r"""<!doctype html>
   </div>
   <div class="right">
     <h2 class="sec">Activity — what it's looking at right now</h2>
+    <div id="picker" style="display:none"></div>
     <div id="log"><p class="hint">Enter a question and press <b>Appraise</b>. Steps will stream here.</p></div>
     <div id="result" style="display:none">
       <h2 class="sec" style="margin-top:22px">Verdict</h2>
@@ -282,6 +329,7 @@ document.querySelectorAll('.examples button').forEach(b => b.onclick = () => {
   $('source').value = b.dataset.s; $('target').value = b.dataset.t;
 });
 let es = null;
+const ENTITY_TYPE = {target:'gene', disease:'disease', drug:'drug', variant:'variant'};
 function addEvent(stage, detail){
   const row = document.createElement('div'); row.className='ev';
   const badge = document.createElement('span'); badge.className='badge b-'+stage; badge.textContent=stage;
@@ -289,16 +337,68 @@ function addEvent(stage, detail){
   row.appendChild(badge); row.appendChild(txt); $('log').appendChild(row);
   $('log').scrollTop = $('log').scrollHeight;
 }
-$('go').onclick = () => {
+async function resolveNode(text, nodeType){
+  const p = new URLSearchParams({text, node_type:nodeType});
+  return (await fetch('/resolve?'+p.toString())).json();
+}
+$('go').onclick = async () => {
   const src=$('source').value.trim(), tgt=$('target').value.trim();
   if(!src||!tgt){ alert('Enter a source and a target.'); return; }
   if(es){ es.close(); }
-  $('log').innerHTML=''; $('result').style.display='none'; $('go').disabled=true;
-  $('go').innerHTML='<span class="spin"></span> Appraising…';
-  const p = new URLSearchParams({source:src, target:tgt, edge:$('edge').value,
-    source_type:$('source_type').value, target_type:$('target_type').value,
+  $('log').innerHTML=''; $('result').style.display='none';
+  $('picker').style.display='none'; $('picker').innerHTML='';
+  // Offline mode uses the curated table, no online resolution -> stream directly.
+  if($('offline').checked){ startStream(src, tgt, {source:null, target:null}); return; }
+  // Resolve both endpoints first; only interrupt if something is unclear.
+  $('go').disabled=true; $('go').innerHTML='<span class="spin"></span> Resolving…';
+  let rs, rt;
+  try {
+    [rs, rt] = await Promise.all([resolveNode(src, $('source_type').value),
+                                  resolveNode(tgt, $('target_type').value)]);
+  } catch(err){ $('go').disabled=false; $('go').textContent='Appraise'; alert('Resolve failed: '+err); return; }
+  $('go').disabled=false; $('go').textContent='Appraise';
+  const picks = {source:null, target:null}, needs=[];
+  if(rs.status==='resolved'){ picks.source = pick(rs.best); } else { needs.push(['source', src, rs]); }
+  if(rt.status==='resolved'){ picks.target = pick(rt.best); } else { needs.push(['target', tgt, rt]); }
+  if(needs.length===0){ startStream(src, tgt, picks); return; }
+  showPicker(needs, src, tgt, picks);
+};
+function pick(best){ return best ? {id:best.id, label:best.name, type:ENTITY_TYPE[best.entity]||'gene', entity:best.entity} : null; }
+function showPicker(needs, src, tgt, picks){
+  const box = $('picker'); box.style.display='block';
+  box.innerHTML = '<h3>Confirm what you meant</h3>';
+  needs.forEach(([which, text, res]) => {
+    const div = document.createElement('div'); div.className='pick';
+    div.innerHTML = `<div class="pick-q">${which} — "<b>${text}</b>"</div>`;
+    if(res.note){ const n=document.createElement('div'); n.className='pick-note'; n.textContent=res.note; div.appendChild(n); }
+    (res.candidates||[]).forEach(c => {
+      const b=document.createElement('button'); b.className='cand';
+      b.innerHTML = `${c.name} <span class="ent">${c.entity}</span>`;
+      b.onclick = () => {
+        picks[which] = {id:c.id, label:c.name, type:ENTITY_TYPE[c.entity]||'gene', entity:c.entity};
+        div.querySelectorAll('.cand').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+        if(picks.source && picks.target){ $('picker').style.display='none'; startStream(src, tgt, picks); }
+      };
+      div.appendChild(b);
+    });
+    if(res.status==='not_found'){
+      const e=document.createElement('div'); e.className='pick-note';
+      e.textContent='No confident match — edit the box on the left and press Appraise again.';
+      div.appendChild(e);
+    }
+    box.appendChild(div);
+  });
+}
+function startStream(src, tgt, picks){
+  $('go').disabled=true; $('go').innerHTML='<span class="spin"></span> Appraising…';
+  const s=picks.source, t=picks.target;
+  const edge = (s && s.entity==='variant') ? 'genetic_risk' : $('edge').value;
+  const p = new URLSearchParams({source:src, target:tgt, edge,
+    source_type: s? s.type : $('source_type').value, target_type: t? t.type : $('target_type').value,
     offline:$('offline').checked, ancestry:$('ancestry').value, tissue:$('tissue').value,
     disease_subtype:$('disease_subtype').value});
+  if(s){ p.set('source_id', s.id); p.set('source_label', s.label); }
+  if(t){ p.set('target_id', t.id); p.set('target_label', t.label); }
   es = new EventSource('/stream?'+p.toString());
   es.onmessage = (e) => {
     const ev = JSON.parse(e.data);
@@ -311,14 +411,13 @@ $('go').onclick = () => {
       const doc = ev.report_html;
       $('report').srcdoc = doc;
       $('download').href = URL.createObjectURL(new Blob([doc], {type:'text/html'}));
-      $('result').style.display='block';
-      $('result').scrollIntoView({behavior:'smooth'});
+      $('result').style.display='block'; $('result').scrollIntoView({behavior:'smooth'});
       finish();
     }
     if(ev.stage==='error'){ finish(); }
   };
   es.onerror = () => { addEvent('error','stream closed'); finish(); };
-};
+}
 function finish(){ if(es){es.close(); es=null;} $('go').disabled=false; $('go').textContent='Appraise'; }
 </script>
 </body></html>

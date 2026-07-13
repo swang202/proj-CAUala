@@ -9,21 +9,23 @@ experiment that would prove me wrong."*
 ## What this is, and why it exists
 
 Most of biology quietly measures **association** and then narrates it as
-**causation**. That mistake is expensive — and CAUala is built to stop it.
+**causation**. That mistake is expensive, and I built CAUala to make it harder to
+make.
 
-Causality is hard to hold onto. This tool exists to help you climb as close to it
-as the available evidence allows, and to be honest about how close that is. The cost
-of getting it wrong is real: chasing a passenger target for a decade, giving a
-patient a drug that can't help them, or building on a mechanism that doesn't hold.
+Causality is hard to hold onto. I think the honest goal is not certainty but to
+climb as close to it as the evidence allows — and to say plainly how close that is.
+The cost of getting it wrong is real: chasing a passenger target for a decade,
+giving a patient a drug that cannot help them, or building on a mechanism that does
+not hold.
 
-**And biology breaks the standard rules for causation.** The textbook tests were
-built for single-exposure epidemiology, and molecular biology hands you a
-counterexample to each of them.
-
-A tool that applies one fixed rule is confidently wrong on exactly the cases that
-matter most. So CAUala doesn't: it **fits the evidence standard to the question** —
-the arrow you're asking about decides which evidence can settle it — and it always
-answers **conditionally** (`A → B | context`), never with a context-free yes/no.
+And biology breaks the textbook rules for causation, which were written for
+single-exposure epidemiology. For example, the same gene can be causal on one
+genetic background and neutral on another, and a knockout can look silent only
+because a paralog quietly compensates. A tool that applies one fixed rule is
+confidently wrong on exactly the cases that matter most. So CAUala does not: it
+**fits the evidence standard to the question** — the arrow you are asking about
+decides which evidence can settle it — and it always answers **conditionally**
+(`A → B | context`), never with a context-free yes or no.
 
 > The deeper motivation (and why the textbook causal rules break in molecular
 > biology) is in **[memo.md](memo.md)**; the reasoning framework is in
@@ -33,29 +35,44 @@ answers **conditionally** (`A → B | context`), never with a context-free yes/n
 
 ## The core idea: association ≠ causation
 
-The whole point is that **ranking by correlation and ranking by causation
-disagree** — and that gap is where expensive mistakes live. CAUala is designed to
-recover the cases the field already paid to learn. It does, today, from real
-evidence:
+The whole point is that ranking by correlation and ranking by causation disagree,
+and that gap is where the expensive mistakes live. The cases below are ones the
+field has already paid to learn, and CAUala recovers each:
 
 | Target → disease | Correlates with disease? | CAUala's verdict | What it really is |
 |---|---|---|---|
 | **PCSK9** → coronary artery disease | yes | `causal_driver` | validated driver (drugs work) |
 | **HDL cholesterol** → coronary artery disease | **strongly** | `refuted` | a marker — HDL-raising drugs failed |
-| **CRP** → coronary artery disease | strongly | `likely_noncausal` | the signal is one node upstream (IL-6) |
 | **amyloid** → Alzheimer's | **weakly** | `likely_causal` | an early, upstream initiator |
 | **tau** → Alzheimer's | strongly | `plausible` | an excellent biomarker, uncertain target |
 
-HDL and tau **correlate beautifully but aren't drivers**; amyloid **correlates
-weakly but is causal**. A tool that only ranked association would get all three
-backwards. That divergence is the product.
+HDL and tau **correlate beautifully but are not drivers**; amyloid **correlates
+weakly but is causal**. A tool that ranked by association alone would get all three
+backwards, and that disagreement is the product.
+
+**How it does this, in brief.** CAUala types your question into
+`source → target | context`, looks up which kinds of evidence can actually establish
+that arrow, and **queries real genomics databases for them — Open Targets and gnomAD
+today, live over the network** — with more sources being added. It then scores what
+it finds through a causal lens, on separate for-and-against axes, and it *gates*
+rather than sums: association and mechanism alone are capped, a beautiful pathway can
+never buy a causal score, and direction has to come from genetics, time, or
+perturbation, never from cross-sectional correlation. The scoring is a deterministic
+Python core, so results are reproducible; an optional language-model layer only
+parses the question and writes prose, and it never computes a score.
+
+I want to be candid so no one is misled: the databases wired live today return
+direction-less signals, so for a brand-new gene the tool honestly says "unvalidated"
+until the directional connectors are added, and the strong verdicts above also draw
+on hand-curated directional evidence. The machinery runs end-to-end on real data;
+the breadth of the live data is still growing.
 
 ---
 
 ## What you get back
 
-Ask a question like *"does PCSK9 cause coronary artery disease?"* and CAUala returns
-a structured, cited report:
+Ask *"does PCSK9 cause coronary artery disease?"* and you get back a structured,
+cited report — not a single number:
 
 - a **headline verdict tier** (`causal_driver` → `likely_causal` → `plausible` →
   `unvalidated` → `likely_noncausal` → `refuted`);
@@ -75,6 +92,10 @@ nothing is presented as a checked fact that hasn't been checked.
 
 ## Try it in 30 seconds
 
+**A hosted website is on the way** — I am setting it up on Render right now, so soon
+you will be able to open a link and use CAUala with no install at all. In the
+meantime, it runs locally in a few commands:
+
 ```bash
 # one-time setup
 uv venv --python python3.11 .venv
@@ -93,31 +114,6 @@ The web app is the easiest entry point for non-technical users: type a gene and 
 disease, watch it stream *what it's looking at right now* (which databases it's
 querying, what it found), then read the report in the page. Full install, all CLI
 commands, and the architecture are in **[IMPLEMENTATION.md](IMPLEMENTATION.md)**.
-
----
-
-## How it works, in one breath
-
-CAUala **types your question** (`source → target | context`), looks up **which kinds
-of evidence can actually establish that arrow**, **queries real genomics databases**
-for them (Open Targets, gnomAD, and more), **scores** what it finds through a causal
-lens on separate *for* and *against* axes, and returns the verdict above. The
-scoring is a **deterministic Python core** so results are reproducible and testable;
-an optional LLM layer only parses questions and writes prose — **it never computes a
-score.**
-
-Three principles keep it honest:
-
-1. **Conditional, not global.** The claim is always `A → B | context`; generalizing
-   beyond the observed context is flagged, not assumed.
-2. **A mechanism story can never raise the score.** A beautiful pathway is a
-   tiebreaker, not evidence of causation (this is exactly how false claims *feel*
-   true). The score is **gated**, not summed.
-3. **Direction has to be earned.** Cross-sectional correlation carries zero
-   directional credit; direction comes from genetics, time-course, or perturbation.
-
-The full framework (Pearl's ladder + Bradford Hill, re-derived for molecular
-biology, with the evidence-tier ladder) is in **[CONCEPTS.md](CONCEPTS.md)**.
 
 ---
 
@@ -145,10 +141,12 @@ version:
 
 | Path | What's there |
 |---|---|
-| `src/` | The deterministic core (`schema`, `scoring`, `scoring_engine`), `connectors/`, `orchestrator`, `report`, `provenance`, `cli`, `webapp`. |
+| `src/` | The deterministic core (`schema`, `scoring`, `scoring_engine`, `exemplars`), entity `resolve`, `harmonization`, `orchestrator`, `report`, `provenance`, `validation`, `cli`, `webapp`. |
+| `src/connectors/` | The connector contract + the live sources (Open Targets, its genetics & variant queries, gnomAD) and the offline `fixtures` backbone. |
 | `registry/` · `scoring/` | Editable YAML: the evidence-stack registry, the curated evidence, the scoring rubric. |
 | `tests/` | The 26 known-answer tests + pipeline, web, and opt-in live tests. |
-| `reports/` | Generated sample reports (example outputs, not documentation). |
+| `docs/` | The documentation hub and guides — start at [docs/README.md](docs/README.md). |
+| `reports/`, `schemas/` | **Generated** — reports via `cauala appraise --out`, schemas via `cauala export-schemas`. Git-ignored, not committed. |
 | `Dockerfile`, `render.yaml`, `fly.toml`, `Procfile`, `deploy/` | Hosting configs — see [docs/DEPLOY.md](docs/DEPLOY.md). |
 
 ---

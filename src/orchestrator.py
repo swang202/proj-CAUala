@@ -26,8 +26,11 @@ from src.connectors.base import CACHE
 from src.connectors.fixtures import CuratedCase, FixtureConnector
 from src.connectors.gnomad import GnomadConnector
 from src.connectors.opentargets import OpenTargetsConnector
+from src.connectors.opentargets_genetics import OpenTargetsGeneticsConnector
+from src.connectors.opentargets_variant import OpenTargetsVariantConnector
 from src.harmonization import Harmonization, harmonize
-from src.question import Question
+from src.question import EdgeType, NodeType, Question
+from src.resolve import EntityResolver, Resolution
 from src.schema import (
     Composite,
     Context,
@@ -81,7 +84,10 @@ class Orchestrator:
         self.registry = load_registry()
         self.fixtures = FixtureConnector()
         self.opentargets = OpenTargetsConnector(online=online)
+        self.opentargets_genetics = OpenTargetsGeneticsConnector(online=online)
+        self.opentargets_variant = OpenTargetsVariantConnector(online=online)
         self.gnomad = GnomadConnector(online=online)
+        self.resolver = EntityResolver(online=online)
 
     # -- registry matching --------------------------------------------------
 
@@ -153,19 +159,32 @@ class Orchestrator:
 
     # -- main entry ---------------------------------------------------------
 
+    @staticmethod
+    def _apply_resolution(q: Question, which: str, node, res: Resolution) -> Question:
+        """Apply a resolution to a node. A variant candidate additionally flips the
+        node type to VARIANT and (for the source) the edge to genetic_risk, so the
+        question routes to variant-level evidence."""
+        if not (res.best and res.status in ("resolved", "ambiguous")):
+            return q
+        upd = {"id": res.best.id, "label": res.best.name}
+        if res.best.entity == "variant":
+            upd["type"] = NodeType.VARIANT
+        q = q.model_copy(update={which: node.model_copy(update=upd)})
+        if res.best.entity == "variant" and which == "source":
+            q = q.model_copy(update={"edge_type": EdgeType.GENETIC_RISK})
+        return q
+
     def _resolve_online(self, q: Question) -> Question:
-        """When online and the offline table missed an id, resolve it via the Open
-        Targets search endpoint. Never fabricates -- an unresolved node stays so."""
-        source, target = q.source, q.target
-        if not source.is_resolved():
-            hit = self.opentargets.resolve(source.display(), "target")
-            if hit:
-                source = source.model_copy(update={"id": hit[0], "label": hit[1]})
-        if not target.is_resolved():
-            hit = self.opentargets.resolve(target.display(), "disease")
-            if hit:
-                target = target.model_copy(update={"id": hit[0], "label": hit[1]})
-        return q.model_copy(update={"source": source, "target": target})
+        """Resolve unresolved node ids via the type-constrained entity resolver.
+        Applies the best candidate for a confident OR ambiguous match; leaves a
+        not-found node unresolved. Never fabricates an id."""
+        for which in ("source", "target"):
+            node = getattr(q, which)
+            if node.is_resolved():
+                continue
+            _, res = self.resolver.resolve_node(node)
+            q = self._apply_resolution(q, which, node, res)
+        return q
 
     async def appraise_events(self, q: Question) -> "AsyncIterator[dict]":
         """Run the appraisal, yielding human-readable progress events as it goes.
@@ -184,12 +203,23 @@ class Orchestrator:
         yield {"stage": "harmonize", "detail": detail, "warnings": harm.notes}
 
         if self.online:
-            before = (q.source.id, q.target.id)
-            q = self._resolve_online(q)
-            if (q.source.id, q.target.id) != before:
-                yield {"stage": "resolve", "detail":
-                       f"Resolved online via Open Targets search → "
-                       f"{q.source.id or '?'} / {q.target.id or '?'}"}
+            for which in ("source", "target"):
+                node = getattr(q, which)
+                if node.is_resolved():
+                    continue
+                _, res = self.resolver.resolve_node(node)
+                q = self._apply_resolution(q, which, node, res)
+                if res.status == "resolved":
+                    yield {"stage": "resolve", "detail": f"{node.display()} → {res.best.label()}"}
+                elif res.status == "ambiguous":
+                    alts = "; ".join(c.name for c in res.candidates)
+                    yield {"stage": "clarify",
+                           "detail": f"'{node.display()}' — using {res.best.name}. Alternatives: {alts}",
+                           "candidates": [{"id": c.id, "name": c.name, "entity": c.entity}
+                                          for c in res.candidates],
+                           "node": which}
+                else:  # not_found
+                    yield {"stage": "clarify", "detail": res.note, "node": which}
 
         stack_entry = self.match_stack(q)
         stack = stack_entry["canonical_stack"] if stack_entry else []
@@ -211,7 +241,8 @@ class Orchestrator:
                    "detail": f"Curated evidence store: {len(fetched)} record(s) for this target."}
 
         if self.online:
-            for connector in (self.opentargets, self.gnomad):
+            for connector in (self.opentargets, self.opentargets_genetics,
+                              self.opentargets_variant, self.gnomad):
                 if connector.available_for(q):
                     yield {"stage": "query", "connector": connector.connector_id,
                            "detail": f"Querying {connector.connector_id}…"}
@@ -345,6 +376,13 @@ class Orchestrator:
         it = items[0]
         if connector_id == "opentargets" and it.effect:
             return f"Open Targets: integrated association score {it.effect.value} (direction-less backbone)."
+        if connector_id == "opentargets_genetics":
+            dirs = ", ".join(sorted({i.direction.value.split("_")[-1] for i in items}))
+            return (f"Open Targets genetics: {len(items)} directional variant record(s) "
+                    f"(GWAS / burden / ClinVar), disease direction: {dirs}.")
+        if connector_id == "opentargets_variant":
+            return (f"Open Targets variant evidence: {len(items)} disease-specific record(s) "
+                    f"for this variant (ClinVar / GWAS / burden).")
         if connector_id == "gnomad" and it.effect:
             return f"gnomAD: constraint LOEUF={it.effect.value} (plausibility gate only)."
         return f"{connector_id}: {len(items)} record(s)."

@@ -41,6 +41,29 @@ _DISEASE_IDS: dict[str, tuple[str, str]] = {
     "alzheimer's disease": ("MONDO_0004975", "Alzheimer disease"),
     "alzheimer disease": ("MONDO_0004975", "Alzheimer disease"),
     "ad": ("MONDO_0004975", "Alzheimer disease"),
+    "parkinson disease": ("MONDO_0005180", "Parkinson disease"),
+    "parkinson's disease": ("MONDO_0005180", "Parkinson disease"),
+    "parkinsons": ("MONDO_0005180", "Parkinson disease"),
+    "pd": ("MONDO_0005180", "Parkinson disease"),
+}
+
+# Common disease abbreviations expanded to their full term BEFORE resolution, so
+# "PD" is understood as Parkinson's disease rather than left to a fuzzy search that
+# could match the wrong entity. Expansion is recorded as a harmonization note.
+_DISEASE_ABBREV: dict[str, str] = {
+    "pd": "Parkinson disease",
+    "ad": "Alzheimer disease",
+    "als": "amyotrophic lateral sclerosis",
+    "ftd": "frontotemporal dementia",
+    "hd": "Huntington disease",
+    "ms": "multiple sclerosis",
+    "cad": "coronary artery disease",
+    "chd": "coronary artery disease",
+    "cvd": "cardiovascular disease",
+    "t2d": "type 2 diabetes mellitus",
+    "ibd": "inflammatory bowel disease",
+    "ra": "rheumatoid arthritis",
+    "scz": "schizophrenia",
 }
 
 # Disease terms known to span many mechanistically distinct subtypes. A hit sets
@@ -89,15 +112,32 @@ def is_coarse_label(disease_term: str) -> tuple[bool, list[str]]:
     return (subtypes is not None, subtypes or [])
 
 
+def _expand_abbreviation(node: Node) -> tuple[Node, Optional[str]]:
+    """Expand a known disease abbreviation (PD -> Parkinson disease) on a disease/
+    phenotype node so the term is understood, not fuzzy-matched. Returns the node
+    (possibly updated) and a note describing the expansion."""
+    if node.type not in (NodeType.DISEASE, NodeType.PHENOTYPE):
+        return node, None
+    key = node.display().strip().lower()
+    full = _DISEASE_ABBREV.get(key)
+    if full is None or full.lower() == key:
+        return node, None
+    return node.model_copy(update={"symbol": full}), f"Read '{node.display()}' as '{full}'."
+
+
 def harmonize(q: Question) -> Harmonization:
     """Resolve both endpoints and flag a coarse disease label. Never fabricates ids."""
-    source = _resolve_node(q.source)
-    target = _resolve_node(q.target)
+    notes: list[str] = []
+    src_node, src_note = _expand_abbreviation(q.source)
+    tgt_node, tgt_note = _expand_abbreviation(q.target)
+    notes.extend(n for n in (src_note, tgt_note) if n)
+
+    source = _resolve_node(src_node)
+    target = _resolve_node(tgt_node)
     resolved = q.model_copy(update={"source": source, "target": target})
 
     unresolved = [n.display() for n in (source, target) if not n.is_resolved()]
-    coarse, subtypes = is_coarse_label(q.target.display())
-    notes: list[str] = []
+    coarse, subtypes = is_coarse_label(target.display())
     if coarse:
         notes.append(
             f"'{q.target.display()}' maps to many subtypes ({', '.join(subtypes)}); "
