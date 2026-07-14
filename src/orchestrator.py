@@ -25,6 +25,7 @@ import yaml
 from src.connectors.base import CACHE
 from src.connectors.fixtures import CuratedCase, FixtureConnector
 from src.connectors.gnomad import GnomadConnector
+from src.connectors.knowledge import KnowledgeConnector
 from src.connectors.opentargets import OpenTargetsConnector
 from src.connectors.opentargets_genetics import OpenTargetsGeneticsConnector
 from src.connectors.opentargets_variant import OpenTargetsVariantConnector
@@ -87,6 +88,9 @@ class Orchestrator:
         self.opentargets_genetics = OpenTargetsGeneticsConnector(online=online)
         self.opentargets_variant = OpenTargetsVariantConnector(online=online)
         self.gnomad = GnomadConnector(online=online)
+        # Model-in-the-loop, citation-gated. Off unless CAUALA_ENABLE_KNOWLEDGE=1 and an
+        # API key are both set; otherwise available_for() is False and it is skipped.
+        self.knowledge = KnowledgeConnector.from_env()
         self.resolver = EntityResolver(online=online)
 
     # -- registry matching --------------------------------------------------
@@ -242,7 +246,7 @@ class Orchestrator:
 
         if self.online:
             for connector in (self.opentargets, self.opentargets_genetics,
-                              self.opentargets_variant, self.gnomad):
+                              self.opentargets_variant, self.gnomad, self.knowledge):
                 if connector.available_for(q):
                     yield {"stage": "query", "connector": connector.connector_id,
                            "detail": f"Querying {connector.connector_id}…"}
@@ -385,6 +389,9 @@ class Orchestrator:
                     f"for this variant (ClinVar / GWAS / burden).")
         if connector_id == "gnomad" and it.effect:
             return f"gnomAD: constraint LOEUF={it.effect.value} (plausibility gate only)."
+        if connector_id == "knowledge":
+            return (f"Knowledge connector: {len(items)} model-proposed claim(s) whose citations "
+                    f"were confirmed in Europe PMC (tagged [TRAINING - verify]; read the primary paper).")
         return f"{connector_id}: {len(items)} record(s)."
 
     def appraise_sync(self, q: Question) -> TargetAppraisal:

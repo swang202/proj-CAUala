@@ -18,6 +18,11 @@ web = [
     "fastapi>=0.110",
     "uvicorn>=0.29",
 ]
+# The model-in-the-loop knowledge connector (opt-in). Only needed when
+# CAUALA_ENABLE_KNOWLEDGE=1; the connector degrades to a named gap without it.
+knowledge = [
+    "anthropic>=0.40",
+]
 
 [project.scripts]
 cauala = "src.cli:main"

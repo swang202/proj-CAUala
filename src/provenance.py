@@ -83,9 +83,25 @@ _CURATED = DataSource(
     "paper before any real use.",
     provenance_tag="[UNVERIFIED]",
 )
+# Model-proposed, citation-verified. The claim comes from a language model's knowledge;
+# the PMID was confirmed live in Europe PMC to exist and to mention the gene + disease.
+# The effect/direction still need reading in the primary paper -- hence [TRAINING - verify],
+# never [RETRIEVED].
+_KNOWLEDGE = DataSource(
+    id="knowledge",
+    name="Model knowledge (citation-verified in Europe PMC)",
+    citation="per-item primary-study PMID; Europe PMC (Ferreira et al., NAR 51:D1512, 2023) used to verify",
+    doi="10.1093/nar/gkac1156",
+    url="https://europepmc.org",
+    access_class="C (model-proposed, citation-verified)",
+    retrieval="language model proposed the claim; its PMID confirmed live in Europe PMC this session",
+    validation="TRAINING — the claim is model-proposed and its citation was confirmed to exist and "
+    "match the gene+disease; READ THE PRIMARY PAPER to confirm the effect and direction before use.",
+    provenance_tag="[TRAINING - verify]",
+)
 
 DATA_SOURCES: dict[str, DataSource] = {
-    s.id: s for s in (_OPEN_TARGETS, _OPEN_TARGETS_GENETICS, _GNOMAD, _CURATED)
+    s.id: s for s in (_OPEN_TARGETS, _OPEN_TARGETS_GENETICS, _GNOMAD, _CURATED, _KNOWLEDGE)
 }
 
 # Prefixes that identify a live-retrieved item by its provenance_group. Order the
@@ -100,6 +116,8 @@ _LIVE_PREFIXES = {
 def source_of(item: EvidenceItem) -> DataSource:
     """Which DataSource an item came from, inferred from its provenance group."""
     pg = item.provenance_group.lower()
+    if pg.startswith("knowledge"):
+        return DATA_SOURCES["knowledge"]
     for src_id, prefix in _LIVE_PREFIXES.items():
         if pg.startswith(prefix):
             return DATA_SOURCES[src_id]
@@ -108,6 +126,12 @@ def source_of(item: EvidenceItem) -> DataSource:
 
 def is_live(item: EvidenceItem) -> bool:
     return source_of(item).id in _LIVE_PREFIXES
+
+
+def is_model_proposed(item: EvidenceItem) -> bool:
+    """Model-proposed, citation-verified evidence -- distinct from both a database
+    retrieval and a hand-curated fixture, and flagged as such in the banner."""
+    return source_of(item).id == "knowledge"
 
 
 def accession(item: EvidenceItem) -> str:
@@ -130,13 +154,20 @@ def cite(item: EvidenceItem) -> str:
 def validation_banner(items: list[EvidenceItem]) -> str:
     """A prominent 'these need validating' summary for the top of a report."""
     live = [i for i in items if is_live(i)]
-    curated = [i for i in items if not is_live(i)]
+    proposed = [i for i in items if is_model_proposed(i)]
+    curated = [i for i in items if not is_live(i) and not is_model_proposed(i)]
     parts: list[str] = []
     if live:
         srcs = sorted({source_of(i).name for i in live})
         parts.append(
             f"{len(live)} figure(s) RETRIEVED live this session from {', '.join(srcs)} "
             "— tagged [RETRIEVED]; verify each in-source before use."
+        )
+    if proposed:
+        parts.append(
+            f"{len(proposed)} figure(s) MODEL-PROPOSED with a citation confirmed to exist and "
+            "match the gene+disease in Europe PMC — tagged [TRAINING - verify]; read the primary "
+            "paper to confirm the effect and direction before use."
         )
     if curated:
         parts.append(

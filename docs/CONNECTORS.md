@@ -60,16 +60,54 @@ CAUALA_LIVE=1 .venv/bin/python -m pytest tests/test_live.py -v
 > cannot lift the tier by itself — it lands in `association`, and the gate still
 > demands *directional* causal evidence (MR, perturbation, RCT) to go causal.
 
+## The knowledge connector (model-in-the-loop, citation-gated)
+
+The wired databases are only as good as their annotations. APOE is the textbook
+Alzheimer's risk gene, yet Open Targets returns its genetic records with no
+direction-of-effect field, so the directional connector drops them and APOE
+under-calls to `unvalidated`. The **knowledge connector**
+(`src/connectors/knowledge.py`) fills that kind of gap without breaking the tool's
+first rule — *the model never decides the verdict*:
+
+1. **Propose.** A language model returns candidate cited claims (gene, disease,
+   dimension, direction, effect, and a **PMID**) — evidence, not a score.
+2. **Verify.** Each PMID is looked up **live in Europe PMC** (keyless). It must
+   resolve to a real record whose title/abstract mentions the gene *and* the
+   disease. A hallucinated PMID fails existence; a real-but-off-topic PMID fails
+   topicality. *(In development this gate caught two PMIDs the model itself
+   misremembered — one was a plant-virus paper.)*
+3. **Score.** Survivors become ordinary `EvidenceItem`s and go through the same
+   `assemble_dimension` scorer as every other connector. They are tagged
+   `[TRAINING - verify]`: model-proposed, citation-confirmed, effect still to be
+   read in the primary paper.
+
+With one verified genetic fact (Corder 1993), APOE→AD lifts `unvalidated → plausible`.
+
+**Enablement is explicit opt-in** — no appraisal makes a model call (or incurs cost)
+unless you ask:
+
+```bash
+pip install -e '.[knowledge]'          # adds the anthropic SDK
+export ANTHROPIC_API_KEY=sk-...         # your key
+export CAUALA_ENABLE_KNOWLEDGE=1        # the explicit switch
+# optional: export CAUALA_KNOWLEDGE_MODEL=claude-sonnet-5   (default)
+```
+
+Without both the switch and a key, the connector reports itself as a named gap and
+returns `[]`.
+
 ## Auth reality (from the build brief §3)
 
 | Source | Status here | Auth | How to enable |
 |---|---|---|---|
 | **Open Targets** | ✅ wired, working | none | `--online` |
 | **gnomAD** | ✅ wired, working | none | `--online` |
+| **Knowledge (model-in-the-loop)** | ✅ wired, opt-in | Anthropic key | `CAUALA_ENABLE_KNOWLEDGE=1` + `ANTHROPIC_API_KEY` |
+| **Europe PMC** (citation gate) | ✅ wired (verifier) | none | used by the knowledge connector |
 | GWAS Catalog | contract + registry entry | none | implement `fetch` (REST v2) |
 | eQTL Catalogue | contract + registry entry | none | implement `fetch` (REST / tabix) |
 | ClinVar | contract + registry entry | optional NCBI key | `NCBI_API_KEY` |
-| Europe PMC | contract + registry entry | none | implement `fetch` |
+| Europe PMC (as evidence connector) | verifier wired; mining `fetch` unbuilt | none | implement `fetch` for literature mining |
 | **OpenGWAS / MR-Base** | contract + registry entry | **JWT bearer (since 05/2024)** | `OPENGWAS_JWT` |
 | OMIM / ClinGen | contract + registry entry | OMIM key (ClinGen none) | `OMIM_API_KEY` |
 | LINCS L1000 (CLUE.io) | contract + registry entry | CLUE key (SigCom none) | `CLUE_API_KEY` |
